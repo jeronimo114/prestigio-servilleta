@@ -1,0 +1,62 @@
+'use client'
+
+import { useWizardStore } from '@/lib/wizard-store'
+import { CampoMoneda } from '@/components/wizard/CampoMoneda'
+
+interface Props { onNext: () => void; onPrev: () => void }
+
+export function StepGastosActual({ onNext }: Props) {
+  const { anioActual, datosAnioActual, updateDatosActual } = useWizardStore()
+  const d = datosAnioActual
+
+  const utilidadNeta = d.utilidadOperacional - d.intereses - d.impuestos + d.otrosIngresosEgresos
+
+  return (
+    <div className="space-y-6">
+      <div className="space-y-2">
+        <div className="inline-block bg-blue-100 text-blue-700 text-xs font-semibold px-3 py-1 rounded-full">
+          Estado de Resultados — {anioActual}
+        </div>
+        <h2 className="text-2xl font-bold text-gray-900">Gastos Financieros e Impuestos</h2>
+      </div>
+
+      <div className="space-y-5">
+        <CampoMoneda
+          label="Intereses Financieros"
+          valor={d.intereses}
+          onChange={(v) => updateDatosActual('intereses', v)}
+          ayuda="Intereses pagados a bancos y entidades financieras"
+          autoFocus
+        />
+
+        <CampoMoneda
+          label="Impuestos"
+          valor={d.impuestos}
+          onChange={(v) => updateDatosActual('impuestos', v)}
+          ayuda="Impuesto de renta y complementarios pagados"
+        />
+
+        <CampoMoneda
+          label="Otros Ingresos / Egresos"
+          valor={d.otrosIngresosEgresos}
+          onChange={(v) => updateDatosActual('otrosIngresosEgresos', v)}
+          ayuda="Ingresos o gastos no operacionales"
+        />
+      </div>
+
+      <div className={`border-2 rounded-xl p-4 ${utilidadNeta >= 0 ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}>
+        <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Utilidad Neta {anioActual}</p>
+        <p className={`text-2xl font-bold ${utilidadNeta >= 0 ? 'text-green-700' : 'text-red-700'}`}>
+          $ {utilidadNeta.toLocaleString('es-CO', { maximumFractionDigits: 2 })} M
+        </p>
+      </div>
+
+      <button
+        onClick={onNext}
+        className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-2xl transition-all shadow-md shadow-blue-200"
+      >
+        Continuar →
+      </button>
+    </div>
+  )
+}
