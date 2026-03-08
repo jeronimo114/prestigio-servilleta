@@ -2,8 +2,53 @@
 
 import { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, Send, MessageCircle } from 'lucide-react'
+import { X, Send } from 'lucide-react'
 import type { Message } from '@/lib/ai-client'
+
+// FAQs contextuales por paso del wizard
+const FAQS_POR_PASO: Record<string, string[]> = {
+  'Datos básicos': [
+    '¿Por qué necesitan mi email?',
+    '¿Mis datos son confidenciales?',
+    '¿Qué sector elijo si tengo varios?',
+  ],
+  'Períodos': [
+    '¿Qué pasa si mi empresa tiene menos de 2 años?',
+    '¿Puedo usar el mismo año en ambos campos?',
+    '¿Qué es un período contable?',
+  ],
+  'Estado de resultados': [
+    '¿Qué son los Ingresos Operacionales?',
+    '¿Cómo calculo la Utilidad Bruta?',
+    '¿Qué es el EBITDA?',
+    '¿Qué incluye en Utilidad Operacional?',
+    '¿Cómo sé cuántos intereses pagué?',
+  ],
+  'Balance General': [
+    '¿Qué es la Cartera Neta?',
+    '¿Qué van en Otros Activos?',
+    '¿Cuál es la diferencia entre deuda CP y LP?',
+    '¿Qué incluye en Otros Pasivos?',
+    '¿Cómo calculo el Patrimonio?',
+  ],
+  'Confirmación': [
+    '¿Puedo cambiar un dato después?',
+    '¿Qué indicadores me van a calcular?',
+    '¿Qué es la Palanca de Crecimiento?',
+  ],
+  'default': [
+    '¿Qué es el EBITDA?',
+    '¿Para qué sirve la servilleta financiera?',
+    '¿Qué es el KTNO?',
+    '¿Cómo interpreto los semáforos?',
+  ],
+}
+
+function getFaqs(paso: string): string[] {
+  // Busca coincidencia parcial en las claves
+  const key = Object.keys(FAQS_POR_PASO).find(k => paso.toLowerCase().includes(k.toLowerCase()))
+  return FAQS_POR_PASO[key ?? 'default']
+}
 
 interface Props {
   paso: string
@@ -96,7 +141,7 @@ export function MascotaAI({ paso, campo }: Props) {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.8, y: 20 }}
             className="absolute bottom-20 right-0 w-80 sm:w-96 bg-white rounded-2xl shadow-2xl border border-blue-100 flex flex-col overflow-hidden"
-            style={{ maxHeight: '480px' }}
+            style={{ maxHeight: '560px' }}
           >
             {/* Header */}
             <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-4 py-3 flex items-center justify-between">
@@ -113,7 +158,7 @@ export function MascotaAI({ paso, campo }: Props) {
             </div>
 
             {/* Messages */}
-            <div className="flex-1 overflow-y-auto p-3 space-y-3 bg-gray-50" style={{ minHeight: '240px', maxHeight: '320px' }}>
+            <div className="flex-1 overflow-y-auto p-3 space-y-3 bg-gray-50" style={{ minHeight: '180px', maxHeight: '240px' }}>
               {historial.map((msg, i) => (
                 <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                   {msg.role === 'assistant' && (
@@ -139,8 +184,67 @@ export function MascotaAI({ paso, campo }: Props) {
               <div ref={bottomRef} />
             </div>
 
+            {/* FAQ chips contextuales */}
+            <div className="px-3 pt-2 pb-1 bg-white border-t border-gray-100">
+              <p className="text-xs text-gray-400 mb-1.5">Preguntas frecuentes</p>
+              <div className="flex flex-wrap gap-1.5">
+                {getFaqs(paso).map((faq) => (
+                  <button
+                    key={faq}
+                    onClick={() => {
+                      setMensaje(faq)
+                      // Pequeño delay para que se vea la pregunta antes de enviar
+                      setTimeout(() => {
+                        setMensaje('')
+                        const nuevoMensaje: Message = { role: 'user', content: faq }
+                        setHistorial((h) => [...h, nuevoMensaje])
+                        setCargando(true)
+                        fetch('/api/chat', {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({ mensaje: faq, paso, campo, historial }),
+                        }).then(async (res) => {
+                          if (!res.body) throw new Error('No stream')
+                          const reader = res.body.getReader()
+                          const decoder = new TextDecoder()
+                          let respuesta = ''
+                          setHistorial((h) => [...h, { role: 'assistant', content: '' }])
+                          while (true) {
+                            const { done, value } = await reader.read()
+                            if (done) break
+                            const chunk = decoder.decode(value)
+                            for (const line of chunk.split('\n')) {
+                              if (line.startsWith('data: ')) {
+                                const data = line.slice(6)
+                                if (data === '[DONE]') continue
+                                try {
+                                  const token = JSON.parse(data).choices?.[0]?.delta?.content || ''
+                                  respuesta += token
+                                  setHistorial((h) => {
+                                    const n = [...h]
+                                    n[n.length - 1] = { role: 'assistant', content: respuesta }
+                                    return n
+                                  })
+                                } catch {}
+                              }
+                            }
+                          }
+                        }).catch(() => {
+                          setHistorial((h) => [...h, { role: 'assistant', content: 'Ups, tuve un problema. ¿Me repites la pregunta?' }])
+                        }).finally(() => setCargando(false))
+                      }, 80)
+                    }}
+                    disabled={cargando}
+                    className="text-xs bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 rounded-full px-2.5 py-1 transition-colors disabled:opacity-40 disabled:cursor-not-allowed text-left"
+                  >
+                    {faq}
+                  </button>
+                ))}
+              </div>
+            </div>
+
             {/* Input */}
-            <div className="p-3 border-t border-gray-100 bg-white">
+            <div className="px-3 pb-3 pt-2 bg-white">
               <div className="flex gap-2">
                 <input
                   type="text"
