@@ -59,14 +59,14 @@ export function CampoMoneda({ label, ayuda, valor, onChange, unidad = 'Millones 
           onBlur={handleBlur}
           autoFocus={autoFocus}
           placeholder="0"
-          className="w-full pl-8 pr-28 py-4 text-xl font-semibold border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:outline-none transition-colors"
+          className="w-full pl-8 pr-28 py-4 text-xl font-semibold border-2 border-gray-200 rounded-xl focus:border-prestigio-700 focus:outline-none transition-colors"
         />
         <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-gray-400 font-medium">
           {unidad}
         </span>
       </div>
       {ayuda && (
-        <p className="text-sm text-gray-500 bg-blue-50 rounded-lg px-3 py-2 border-l-4 border-blue-300">
+        <p className="text-sm text-gris-600 bg-prestigio-50 rounded-lg px-3 py-2 border-l-4 border-prestigio-300">
           💡 {ayuda}
         </p>
       )}

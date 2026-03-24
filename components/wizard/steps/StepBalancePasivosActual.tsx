@@ -15,10 +15,10 @@ export function StepBalancePasivosActual({ onNext }: Props) {
   return (
     <div className="space-y-6">
       <div className="space-y-2">
-        <div className="inline-block bg-blue-100 text-blue-700 text-xs font-semibold px-3 py-1 rounded-full">
+        <div className="inline-block bg-prestigio-100 text-prestigio-700 text-xs font-semibold px-3 py-1 rounded-full">
           Balance General — {anioActual}
         </div>
-        <h2 className="text-2xl font-bold text-gray-900">Pasivos y Patrimonio</h2>
+        <h2 className="text-2xl font-bold text-prestigio-900">Pasivos y Patrimonio</h2>
       </div>
 
       <div className="space-y-5">
@@ -30,12 +30,12 @@ export function StepBalancePasivosActual({ onNext }: Props) {
         <CampoMoneda label="Total Patrimonio" ayuda="Todo lo que vale la empresa para los socios" valor={d.totalPatrimonio} onChange={(v) => updateDatosActual('totalPatrimonio', v)} />
       </div>
 
-      <div className="bg-blue-50 border-2 border-blue-200 rounded-xl p-4">
+      <div className="bg-prestigio-100 border-2 border-prestigio-300 rounded-xl p-4">
         <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Total Pasivos</p>
-        <p className="text-2xl font-bold text-blue-700">$ {totalPasivos.toLocaleString('es-CO', { maximumFractionDigits: 2 })} M</p>
+        <p className="text-2xl font-bold text-prestigio-900">$ {totalPasivos.toLocaleString('es-CO', { maximumFractionDigits: 2 })} M</p>
       </div>
 
-      <button onClick={onNext} className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-2xl transition-all shadow-md shadow-blue-200">
+      <button onClick={onNext} className="w-full bg-prestigio-900 hover:bg-prestigio-800 text-white font-bold py-4 rounded-2xl transition-all shadow-md shadow-prestigio-200">
         Ver mi Diagnóstico →
       </button>
     </div>

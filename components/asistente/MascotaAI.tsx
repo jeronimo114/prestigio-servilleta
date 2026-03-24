@@ -61,7 +61,7 @@ export function MascotaAI({ paso, campo }: Props) {
   const [historial, setHistorial] = useState<Message[]>([
     {
       role: 'assistant',
-      content: '¡Hola! Soy Finny 🐦 Tu guía financiero del PAE. ¿Tienes alguna duda sobre lo que estás ingresando? ¡Pregúntame!',
+      content: 'Hola, soy el Asistente Prestigio. Estoy aquí para ayudarte con cualquier duda sobre los datos financieros que estás ingresando.',
     },
   ])
   const [cargando, setCargando] = useState(false)
@@ -140,16 +140,16 @@ export function MascotaAI({ paso, campo }: Props) {
             initial={{ opacity: 0, scale: 0.8, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.8, y: 20 }}
-            className="absolute bottom-20 right-0 w-80 sm:w-96 bg-white rounded-2xl shadow-2xl border border-blue-100 flex flex-col overflow-hidden"
+            className="absolute bottom-20 right-0 w-80 sm:w-96 bg-white rounded-2xl shadow-2xl border border-prestigio-100 flex flex-col overflow-hidden"
             style={{ maxHeight: '560px' }}
           >
             {/* Header */}
-            <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-4 py-3 flex items-center justify-between">
+            <div className="bg-gradient-to-r from-prestigio-900 to-prestigio-700 px-4 py-3 flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center text-lg">🐦</div>
+                <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center text-sm font-bold text-prestigio-900">P</div>
                 <div>
-                  <p className="text-white font-semibold text-sm">Finny</p>
-                  <p className="text-blue-200 text-xs">Asistente PAE</p>
+                  <p className="text-white font-semibold text-sm">Asistente Prestigio</p>
+                  <p className="text-prestigio-200 text-xs">Tu guía financiero</p>
                 </div>
               </div>
               <button onClick={() => setAbierto(false)} className="text-white/70 hover:text-white">
@@ -162,12 +162,12 @@ export function MascotaAI({ paso, campo }: Props) {
               {historial.map((msg, i) => (
                 <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                   {msg.role === 'assistant' && (
-                    <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center text-sm mr-2 flex-shrink-0 mt-1">🐦</div>
+                    <div className="w-6 h-6 bg-prestigio-100 rounded-full flex items-center justify-center text-xs font-bold text-prestigio-900 mr-2 flex-shrink-0 mt-1">P</div>
                   )}
                   <div
                     className={`max-w-[80%] rounded-2xl px-3 py-2 text-sm ${
                       msg.role === 'user'
-                        ? 'bg-blue-600 text-white rounded-tr-sm'
+                        ? 'bg-prestigio-900 text-white rounded-tr-sm'
                         : 'bg-white text-gray-800 rounded-tl-sm shadow-sm border border-gray-100'
                     }`}
                   >
@@ -235,7 +235,7 @@ export function MascotaAI({ paso, campo }: Props) {
                       }, 80)
                     }}
                     disabled={cargando}
-                    className="text-xs bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 rounded-full px-2.5 py-1 transition-colors disabled:opacity-40 disabled:cursor-not-allowed text-left"
+                    className="text-xs bg-prestigio-50 hover:bg-prestigio-100 text-prestigio-700 border border-prestigio-200 rounded-full px-2.5 py-1 transition-colors disabled:opacity-40 disabled:cursor-not-allowed text-left"
                   >
                     {faq}
                   </button>
@@ -252,13 +252,13 @@ export function MascotaAI({ paso, campo }: Props) {
                   onChange={(e) => setMensaje(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && enviar()}
                   placeholder="Pregúntame algo..."
-                  className="flex-1 text-sm border border-gray-200 rounded-xl px-3 py-2 outline-none focus:border-blue-400"
+                  className="flex-1 text-sm border border-gray-200 rounded-xl px-3 py-2 outline-none focus:border-prestigio-500"
                   disabled={cargando}
                 />
                 <button
                   onClick={enviar}
                   disabled={cargando || !mensaje.trim()}
-                  className="bg-blue-600 text-white rounded-xl px-3 py-2 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="bg-prestigio-900 text-white rounded-xl px-3 py-2 hover:bg-prestigio-800 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <Send size={16} />
                 </button>
@@ -275,10 +275,10 @@ export function MascotaAI({ paso, campo }: Props) {
         whileTap={{ scale: 0.95 }}
         animate={!abierto ? { y: [0, -4, 0] } : {}}
         transition={!abierto ? { repeat: Infinity, duration: 2.5, ease: 'easeInOut' } : {}}
-        className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-700 rounded-full shadow-lg flex items-center justify-center text-2xl border-4 border-white"
-        title="Habla con Finny"
+        className="w-16 h-16 bg-gradient-to-br from-prestigio-900 to-prestigio-700 rounded-full shadow-lg flex items-center justify-center border-4 border-white"
+        title="Habla con el Asistente Prestigio"
       >
-        {abierto ? <X size={24} className="text-white" /> : '🐦'}
+        {abierto ? <X size={24} className="text-white" /> : <span className="text-white text-xl font-bold">P</span>}
       </motion.button>
 
       {/* Notification dot */}
@@ -286,7 +286,7 @@ export function MascotaAI({ paso, campo }: Props) {
         <motion.div
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
-          className="absolute -top-1 -right-1 w-5 h-5 bg-orange-400 rounded-full flex items-center justify-center"
+          className="absolute -top-1 -right-1 w-5 h-5 bg-oliva-500 rounded-full flex items-center justify-center"
         >
           <span className="text-white text-xs font-bold">1</span>
         </motion.div>

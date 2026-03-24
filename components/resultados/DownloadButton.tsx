@@ -45,7 +45,7 @@ export function DownloadButton(props: Props) {
     <button
       onClick={descargar}
       disabled={cargando}
-      className="w-full flex items-center justify-center gap-3 bg-green-600 hover:bg-green-700 disabled:opacity-60 text-white font-bold py-4 rounded-2xl transition-all shadow-lg shadow-green-200 text-base"
+      className="w-full flex items-center justify-center gap-3 bg-prestigio-900 hover:bg-prestigio-800 disabled:opacity-60 text-white font-bold py-4 rounded-2xl transition-all shadow-lg shadow-prestigio-200 text-base"
     >
       <Download size={20} />
       {cargando ? 'Generando Excel...' : 'Descargar mi Servilleta (Excel)'}

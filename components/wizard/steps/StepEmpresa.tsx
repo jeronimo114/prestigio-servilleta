@@ -20,7 +20,7 @@ export function StepEmpresa({ onNext }: Props) {
   return (
     <div className="space-y-6">
       <div className="space-y-2">
-        <h2 className="text-2xl font-bold text-gray-900">¿Quién eres tú?</h2>
+        <h2 className="text-2xl font-bold text-prestigio-900">¿Quién eres tú?</h2>
         <p className="text-gray-500">Cuéntanos un poco sobre ti y tu empresa</p>
       </div>
 
@@ -33,7 +33,7 @@ export function StepEmpresa({ onNext }: Props) {
             onChange={(e) => setNombre(e.target.value)}
             placeholder="Ej: María García"
             autoFocus
-            className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-base focus:border-blue-500 focus:outline-none transition-colors"
+            className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-base focus:border-prestigio-700 focus:outline-none transition-colors"
           />
         </div>
 
@@ -44,7 +44,7 @@ export function StepEmpresa({ onNext }: Props) {
             value={empresa}
             onChange={(e) => setEmpresa(e.target.value)}
             placeholder="Ej: Textiles Nueva Mirada"
-            className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-base focus:border-blue-500 focus:outline-none transition-colors"
+            className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-base focus:border-prestigio-700 focus:outline-none transition-colors"
           />
         </div>
 
@@ -55,7 +55,7 @@ export function StepEmpresa({ onNext }: Props) {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="tu@correo.com"
-            className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-base focus:border-blue-500 focus:outline-none transition-colors"
+            className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-base focus:border-prestigio-700 focus:outline-none transition-colors"
           />
         </div>
 
@@ -68,7 +68,7 @@ export function StepEmpresa({ onNext }: Props) {
                 onClick={() => setSector(s)}
                 className={`py-2 px-3 rounded-xl text-sm font-medium border-2 transition-all ${
                   sector === s
-                    ? 'border-blue-500 bg-blue-50 text-blue-700'
+                    ? 'border-prestigio-700 bg-prestigio-50 text-prestigio-900'
                     : 'border-gray-200 text-gray-600 hover:border-gray-300'
                 }`}
               >
@@ -82,7 +82,7 @@ export function StepEmpresa({ onNext }: Props) {
       <button
         onClick={onNext}
         disabled={!valido}
-        className="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-4 rounded-2xl text-base transition-all shadow-md shadow-blue-200"
+        className="w-full bg-prestigio-900 hover:bg-prestigio-800 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-4 rounded-2xl text-base transition-all shadow-md shadow-prestigio-200"
       >
         Continuar →
       </button>

@@ -70,7 +70,7 @@ export function calcularIndicadores(
   }
 }
 
-// Semáforos según rangos estándar PAE/Bancolombia
+// Semáforos según rangos estándar Prestigio
 export function semaforo(indicador: string, valor: number): SemaforoColor {
   switch (indicador) {
     case 'margenEbitda':

@@ -12,10 +12,10 @@ export function StepCostosActual({ onNext }: Props) {
   return (
     <div className="space-y-6">
       <div className="space-y-2">
-        <div className="inline-block bg-blue-100 text-blue-700 text-xs font-semibold px-3 py-1 rounded-full">
+        <div className="inline-block bg-prestigio-100 text-prestigio-700 text-xs font-semibold px-3 py-1 rounded-full">
           Estado de Resultados — {anioActual}
         </div>
-        <h2 className="text-2xl font-bold text-gray-900">EBITDA y Utilidad Operacional</h2>
+        <h2 className="text-2xl font-bold text-prestigio-900">EBITDA y Utilidad Operacional</h2>
       </div>
 
       <div className="space-y-5">
@@ -36,8 +36,8 @@ export function StepCostosActual({ onNext }: Props) {
       </div>
 
       {d.ebitda > 0 && d.ingresosOperacionales > 0 && (
-        <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
-          <p className="text-sm text-blue-700 font-medium">
+        <div className="bg-prestigio-50 border border-prestigio-200 rounded-xl p-4">
+          <p className="text-sm text-prestigio-700 font-medium">
             📊 Margen EBITDA {anioActual}: {((d.ebitda / d.ingresosOperacionales) * 100).toFixed(1)}%
           </p>
         </div>
@@ -45,7 +45,7 @@ export function StepCostosActual({ onNext }: Props) {
 
       <button
         onClick={onNext}
-        className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-2xl transition-all shadow-md shadow-blue-200"
+        className="w-full bg-prestigio-900 hover:bg-prestigio-800 text-white font-bold py-4 rounded-2xl transition-all shadow-md shadow-prestigio-200"
       >
         Continuar →
       </button>

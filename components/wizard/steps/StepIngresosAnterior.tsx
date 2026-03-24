@@ -12,10 +12,10 @@ export function StepIngresosAnterior({ onNext }: Props) {
   return (
     <div className="space-y-6">
       <div className="space-y-2">
-        <div className="inline-block bg-orange-100 text-orange-700 text-xs font-semibold px-3 py-1 rounded-full">
+        <div className="inline-block bg-oliva-100 text-oliva-600 text-xs font-semibold px-3 py-1 rounded-full">
           Estado de Resultados — {anioAnterior}
         </div>
-        <h2 className="text-2xl font-bold text-gray-900">Ingresos y Utilidad Bruta</h2>
+        <h2 className="text-2xl font-bold text-prestigio-900">Ingresos y Utilidad Bruta</h2>
         <p className="text-gray-500 text-sm">Cifras en millones de pesos colombianos</p>
       </div>
 
@@ -50,7 +50,7 @@ export function StepIngresosAnterior({ onNext }: Props) {
       <button
         onClick={onNext}
         disabled={d.ingresosOperacionales === 0}
-        className="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-4 rounded-2xl transition-all shadow-md shadow-blue-200"
+        className="w-full bg-prestigio-900 hover:bg-prestigio-800 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-4 rounded-2xl transition-all shadow-md shadow-prestigio-200"
       >
         Continuar →
       </button>

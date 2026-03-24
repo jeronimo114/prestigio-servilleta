@@ -21,7 +21,7 @@ export async function POST(req: NextRequest) {
     const indAct = calcularIndicadores(datosAnioActual, datosAnioAnterior.ingresosOperacionales)
 
     const wb = new ExcelJS.Workbook()
-    wb.creator = 'PAE × Bancolombia'
+    wb.creator = 'Prestigio'
     wb.created = new Date()
 
     // ===================== HOJA 1: SERVILLETA =====================
@@ -29,7 +29,7 @@ export async function POST(req: NextRequest) {
 
     // Styles
     const headerStyle: Partial<ExcelJS.Style> = {
-      fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF1E3A8A' } },
+      fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF003A4B' } },
       font: { color: { argb: 'FFFFFFFF' }, bold: true, size: 11 },
       alignment: { horizontal: 'center', vertical: 'middle' },
       border: {
@@ -38,8 +38,8 @@ export async function POST(req: NextRequest) {
       },
     }
     const subHeaderStyle: Partial<ExcelJS.Style> = {
-      fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFE8F0FE' } },
-      font: { bold: true, color: { argb: 'FF1E3A8A' } },
+      fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFE6F8FB' } },
+      font: { bold: true, color: { argb: 'FF003A4B' } },
       border: {
         top: { style: 'thin' }, bottom: { style: 'thin' },
         left: { style: 'thin' }, right: { style: 'thin' },
@@ -74,12 +74,12 @@ export async function POST(req: NextRequest) {
     // Title
     ws.mergeCells('A1:F1')
     const titleRow = ws.getRow(1)
-    titleRow.getCell(1).value = `SERVILLETA FINANCIERA — ${empresa.toUpperCase()}`
+    titleRow.getCell(1).value = `SERVILLETA FINANCIERA PRESTIGIO — ${empresa.toUpperCase()}`
     titleRow.getCell(1).style = { ...headerStyle, font: { ...headerStyle.font, size: 14 } }
     titleRow.height = 30
 
     ws.mergeCells('A2:F2')
-    ws.getRow(2).getCell(1).value = `Responsable: ${nombre} | Generado: ${new Date().toLocaleDateString('es-CO')} | PAE × Bancolombia`
+    ws.getRow(2).getCell(1).value = `Responsable: ${nombre} | Generado: ${new Date().toLocaleDateString('es-CO')} | Prestigio`
     ws.getRow(2).getCell(1).style = { alignment: { horizontal: 'center' }, font: { italic: true, color: { argb: 'FF6B7280' } } }
 
     // Headers

@@ -12,10 +12,10 @@ export function StepCostosAnterior({ onNext }: Props) {
   return (
     <div className="space-y-6">
       <div className="space-y-2">
-        <div className="inline-block bg-orange-100 text-orange-700 text-xs font-semibold px-3 py-1 rounded-full">
+        <div className="inline-block bg-oliva-100 text-oliva-600 text-xs font-semibold px-3 py-1 rounded-full">
           Estado de Resultados — {anioAnterior}
         </div>
-        <h2 className="text-2xl font-bold text-gray-900">EBITDA y Utilidad Operacional</h2>
+        <h2 className="text-2xl font-bold text-prestigio-900">EBITDA y Utilidad Operacional</h2>
         <p className="text-gray-500 text-sm">¿Cuánto genera tu negocio antes de intereses e impuestos?</p>
       </div>
 
@@ -37,11 +37,11 @@ export function StepCostosAnterior({ onNext }: Props) {
       </div>
 
       {d.ebitda > 0 && d.ingresosOperacionales > 0 && (
-        <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
-          <p className="text-sm text-blue-700 font-medium">
+        <div className="bg-prestigio-50 border border-prestigio-200 rounded-xl p-4">
+          <p className="text-sm text-prestigio-700 font-medium">
             📊 Margen EBITDA: {((d.ebitda / d.ingresosOperacionales) * 100).toFixed(1)}%
           </p>
-          <p className="text-xs text-blue-600 mt-1">
+          <p className="text-xs text-prestigio-700 mt-1">
             {d.ebitda / d.ingresosOperacionales >= 0.15
               ? '✅ Muy saludable (más del 15%)'
               : d.ebitda / d.ingresosOperacionales >= 0.05
@@ -53,7 +53,7 @@ export function StepCostosAnterior({ onNext }: Props) {
 
       <button
         onClick={onNext}
-        className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-2xl transition-all shadow-md shadow-blue-200"
+        className="w-full bg-prestigio-900 hover:bg-prestigio-800 text-white font-bold py-4 rounded-2xl transition-all shadow-md shadow-prestigio-200"
       >
         Continuar →
       </button>

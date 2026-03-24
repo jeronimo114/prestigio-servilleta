@@ -83,20 +83,20 @@ export default function WizardPage() {
   const pasoVisible = pasoActual
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
+    <div className="min-h-screen bg-gris-50">
       {/* Header */}
-      <header className="sticky top-0 z-40 bg-white/80 backdrop-blur-sm border-b border-gray-100 px-4 py-3">
+      <header className="sticky top-0 z-40 bg-white/80 backdrop-blur-sm border-b border-gris-200 px-4 py-3">
         <div className="max-w-2xl mx-auto">
           <div className="flex items-center gap-3 mb-3">
             <button
               onClick={anterior}
-              className="flex items-center gap-1 text-gray-500 hover:text-gray-800 text-sm transition-colors"
+              className="flex items-center gap-1 text-gris-600 hover:text-prestigio-900 text-sm transition-colors"
             >
               <ChevronLeft size={16} />
               {pasoActual === 0 ? 'Inicio' : 'Anterior'}
             </button>
             <div className="flex-1" />
-            <span className="text-xs text-gray-400">PAE × Bancolombia</span>
+            <span className="text-xs text-gris-600 tracking-wide font-medium">Prestigio</span>
           </div>
           {pasoActual > 0 && (
             <ProgressBar paso={pasoActual} total={totalPasosVisibles} titulo={tituloPaso} />
@@ -121,17 +121,17 @@ export default function WizardPage() {
 
       {/* Bottom nav */}
       {pasoActual > 0 && pasoActual < STEPS.length - 1 && (
-        <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 px-4 py-4 z-30">
+        <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gris-200 px-4 py-4 z-30">
           <div className="max-w-2xl mx-auto flex gap-3">
             <button
               onClick={anterior}
-              className="flex-1 border-2 border-gray-200 text-gray-700 font-semibold py-3 rounded-xl hover:border-gray-300 hover:bg-gray-50 transition-all"
+              className="flex-1 border-2 border-gris-300 text-gris-600 font-semibold py-3 rounded-xl hover:border-gris-400 hover:bg-gris-50 transition-all"
             >
               ← Anterior
             </button>
             <button
               onClick={siguiente}
-              className="flex-2 flex-[2] bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-xl transition-all shadow-md shadow-blue-200 flex items-center justify-center gap-2"
+              className="flex-2 flex-[2] bg-prestigio-900 hover:bg-prestigio-700 text-white font-semibold py-3 rounded-xl transition-all shadow-md shadow-prestigio-200 flex items-center justify-center gap-2"
             >
               Continuar <ChevronRight size={18} />
             </button>

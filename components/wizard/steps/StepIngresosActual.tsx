@@ -16,10 +16,10 @@ export function StepIngresosActual({ onNext }: Props) {
   return (
     <div className="space-y-6">
       <div className="space-y-2">
-        <div className="inline-block bg-blue-100 text-blue-700 text-xs font-semibold px-3 py-1 rounded-full">
+        <div className="inline-block bg-prestigio-100 text-prestigio-700 text-xs font-semibold px-3 py-1 rounded-full">
           Estado de Resultados — {anioActual}
         </div>
-        <h2 className="text-2xl font-bold text-gray-900">Ingresos y Utilidad Bruta</h2>
+        <h2 className="text-2xl font-bold text-prestigio-900">Ingresos y Utilidad Bruta</h2>
         <p className="text-gray-500 text-sm">Ahora el año más reciente</p>
       </div>
 
@@ -32,7 +32,7 @@ export function StepIngresosActual({ onNext }: Props) {
         <div className="text-gray-300">→</div>
         <div className="text-center">
           <p className="text-gray-400 text-xs">{anioActual}</p>
-          <p className="font-semibold text-blue-600">$ {d.ingresosOperacionales > 0 ? d.ingresosOperacionales.toLocaleString('es-CO') : '?'} M</p>
+          <p className="font-semibold text-prestigio-700">$ {d.ingresosOperacionales > 0 ? d.ingresosOperacionales.toLocaleString('es-CO') : '?'} M</p>
         </div>
         {crecimiento !== null && (
           <div className={`ml-auto font-bold text-sm ${crecimiento >= 0 ? 'text-green-600' : 'text-red-600'}`}>
@@ -61,7 +61,7 @@ export function StepIngresosActual({ onNext }: Props) {
       <button
         onClick={onNext}
         disabled={d.ingresosOperacionales === 0}
-        className="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-4 rounded-2xl transition-all shadow-md shadow-blue-200"
+        className="w-full bg-prestigio-900 hover:bg-prestigio-800 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-4 rounded-2xl transition-all shadow-md shadow-prestigio-200"
       >
         Continuar →
       </button>

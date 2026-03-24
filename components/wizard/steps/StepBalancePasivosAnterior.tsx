@@ -15,10 +15,10 @@ export function StepBalancePasivosAnterior({ onNext }: Props) {
   return (
     <div className="space-y-6">
       <div className="space-y-2">
-        <div className="inline-block bg-purple-100 text-purple-700 text-xs font-semibold px-3 py-1 rounded-full">
+        <div className="inline-block bg-prestigio-100 text-prestigio-700 text-xs font-semibold px-3 py-1 rounded-full">
           Balance General — {anioAnterior}
         </div>
-        <h2 className="text-2xl font-bold text-gray-900">Pasivos y Patrimonio</h2>
+        <h2 className="text-2xl font-bold text-prestigio-900">Pasivos y Patrimonio</h2>
         <p className="text-gray-500 text-sm">Todo lo que debe tu empresa y lo que aportan los socios</p>
       </div>
 
@@ -67,16 +67,16 @@ export function StepBalancePasivosAnterior({ onNext }: Props) {
         />
       </div>
 
-      <div className="bg-purple-50 border-2 border-purple-200 rounded-xl p-4">
+      <div className="bg-prestigio-100 border-2 border-prestigio-300 rounded-xl p-4">
         <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Total Pasivos</p>
-        <p className="text-2xl font-bold text-purple-700">
+        <p className="text-2xl font-bold text-prestigio-900">
           $ {totalPasivos.toLocaleString('es-CO', { maximumFractionDigits: 2 })} M
         </p>
       </div>
 
       <button
         onClick={onNext}
-        className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-2xl transition-all shadow-md shadow-blue-200"
+        className="w-full bg-prestigio-900 hover:bg-prestigio-800 text-white font-bold py-4 rounded-2xl transition-all shadow-md shadow-prestigio-200"
       >
         Continuar al Año Actual →
       </button>

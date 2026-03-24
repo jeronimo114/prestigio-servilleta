@@ -14,25 +14,21 @@ const CATEGORIAS = [
   {
     id: 'rentabilidad',
     titulo: '2. Rentabilidad',
-    emoji: '📈',
     indicadores: ['Margen EBITDA', 'Margen Neto', 'Crecimiento en Ventas'],
   },
   {
     id: 'liquidez',
     titulo: '1. Liquidez',
-    emoji: '💧',
     indicadores: ['EBITDA / Intereses', 'Ciclo Financiero', 'Palanca de Crecimiento'],
   },
   {
     id: 'endeudamiento',
     titulo: '3. Endeudamiento',
-    emoji: '🏦',
     indicadores: ['Endeudamiento', 'Endeudamiento Financiero'],
   },
   {
     id: 'palanca',
     titulo: '4. Palanca de Crecimiento',
-    emoji: '🚀',
     indicadores: ['Palanca de Crecimiento'],
   },
 ]
@@ -95,25 +91,25 @@ export default function ResultadosPage() {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center space-y-4">
           <p className="text-gray-500">No hay datos disponibles</p>
-          <button onClick={() => router.push('/')} className="text-blue-600 underline">Volver al inicio</button>
+          <button onClick={() => router.push('/')} className="text-prestigio-700 underline">Volver al inicio</button>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
+    <div className="min-h-screen bg-gris-50">
       {/* Header */}
-      <header className="bg-white border-b border-gray-100 px-4 py-4">
+      <header className="bg-white border-b border-gray-200 px-4 py-4">
         <div className="max-w-2xl mx-auto flex items-center justify-between">
           <button
             onClick={() => router.push('/wizard')}
             className="flex items-center gap-2 text-gray-500 hover:text-gray-800 text-sm"
           >
             <ArrowLeft size={16} />
-            Volver al wizard
+            Volver al formulario
           </button>
-          <span className="text-xs text-gray-400">PAE × Bancolombia</span>
+          <span className="text-xs text-gray-400">Prestigio</span>
         </div>
       </header>
 
@@ -124,8 +120,7 @@ export default function ResultadosPage() {
           animate={{ opacity: 1, y: 0 }}
           className="text-center space-y-3"
         >
-          <div className="text-5xl">📊</div>
-          <h1 className="text-2xl font-bold text-gray-900">
+          <h1 className="text-2xl font-bold text-prestigio-900">
             Diagnóstico Financiero
           </h1>
           <p className="text-gray-500">
@@ -134,11 +129,11 @@ export default function ResultadosPage() {
 
           {/* Summary badge */}
           <div className="inline-flex gap-3 bg-white rounded-2xl border border-gray-200 px-4 py-3 shadow-sm">
-            <span className="text-sm text-green-600 font-semibold">{verdes} ✅ Saludable</span>
+            <span className="text-sm text-green-600 font-semibold">{verdes} Saludable</span>
             <span className="text-gray-300">|</span>
-            <span className="text-sm text-yellow-600 font-semibold">{listaIndicadores.filter(i => i.semaforo === 'amarillo').length} ⚠️ Atención</span>
+            <span className="text-sm text-yellow-600 font-semibold">{listaIndicadores.filter(i => i.semaforo === 'amarillo').length} Atención</span>
             <span className="text-gray-300">|</span>
-            <span className="text-sm text-red-600 font-semibold">{rojos} 🔴 Crítico</span>
+            <span className="text-sm text-red-600 font-semibold">{rojos} Crítico</span>
           </div>
         </motion.div>
 
@@ -156,7 +151,7 @@ export default function ResultadosPage() {
 
         {/* Indicadores grid */}
         <motion.section initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }}>
-          <h2 className="text-lg font-bold text-gray-800 mb-4">Tus Indicadores — {anioActual}</h2>
+          <h2 className="text-lg font-bold text-prestigio-900 mb-4">Tus Indicadores — {anioActual}</h2>
           <div className="grid grid-cols-2 gap-3">
             {listaIndicadores.map((ind, i) => (
               <motion.div
@@ -173,7 +168,7 @@ export default function ResultadosPage() {
 
         {/* Comparación años */}
         <motion.section initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }}>
-          <h2 className="text-lg font-bold text-gray-800 mb-4">Comparación {anioAnterior} vs {anioActual}</h2>
+          <h2 className="text-lg font-bold text-prestigio-900 mb-4">Comparación {anioAnterior} vs {anioActual}</h2>
           <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
             {[
               { label: 'Ingresos', ant: datosAnioAnterior.ingresosOperacionales, act: datosAnioActual.ingresosOperacionales, fmt: 'M' },
@@ -198,12 +193,12 @@ export default function ResultadosPage() {
 
         {/* Roadmap / Recomendaciones */}
         <motion.section initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }}>
-          <h2 className="text-lg font-bold text-gray-800 mb-4">🗺️ Tu Hoja de Ruta</h2>
+          <h2 className="text-lg font-bold text-prestigio-900 mb-4">Tu Hoja de Ruta</h2>
           <div className="space-y-3">
             {recomendaciones.map((rec, i) => (
-              <div key={i} className="bg-blue-50 border border-blue-100 rounded-xl p-4 flex gap-3">
-                <span className="text-blue-500 font-bold text-sm flex-shrink-0">{i + 1}.</span>
-                <p className="text-sm text-blue-800 leading-relaxed">{rec}</p>
+              <div key={i} className="bg-prestigio-50 border border-prestigio-100 rounded-xl p-4 flex gap-3">
+                <span className="text-prestigio-700 font-bold text-sm flex-shrink-0">{i + 1}.</span>
+                <p className="text-sm text-prestigio-900 leading-relaxed">{rec}</p>
               </div>
             ))}
           </div>
@@ -213,7 +208,7 @@ export default function ResultadosPage() {
         <motion.section initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.6 }}>
           <div className={`rounded-2xl border-2 p-5 ${indActual.palancaCrecimiento > 1 ? 'bg-green-50 border-green-200' : 'bg-orange-50 border-orange-200'}`}>
             <h3 className="font-bold text-gray-800 mb-2">
-              {indActual.palancaCrecimiento > 1 ? '🚀' : '⚠️'} Palanca de Crecimiento (PDC): {indActual.palancaCrecimiento.toFixed(2)}x
+              Palanca de Crecimiento (PDC): {indActual.palancaCrecimiento.toFixed(2)}x
             </h3>
             <p className="text-sm text-gray-700 leading-relaxed">
               {indActual.palancaCrecimiento > 1

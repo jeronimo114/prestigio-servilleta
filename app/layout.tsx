@@ -1,20 +1,23 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Poppins, Vollkorn } from "next/font/google";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const poppins = Poppins({
+  variable: "--font-poppins",
   subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700", "800"],
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const vollkorn = Vollkorn({
+  variable: "--font-vollkorn",
   subsets: ["latin"],
+  style: ["normal", "italic"],
+  weight: ["400", "500", "600", "700"],
 });
 
 export const metadata: Metadata = {
-  title: "Servilleta Financiera — PAE × Bancolombia",
-  description: "Diagnóstico financiero guiado para empresarios del PAE. Calcula tus indicadores financieros en 10 minutos.",
+  title: "Servilleta Financiera — Prestigio",
+  description: "Diagnóstico financiero guiado para empresarios. Calcula tus indicadores financieros en minutos. Prestigio — Liderando desde el ser.",
 };
 
 export const viewport = {
@@ -31,7 +34,7 @@ export default function RootLayout({
   return (
     <html lang="es">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${poppins.variable} ${vollkorn.variable} antialiased`}
       >
         {children}
       </body>

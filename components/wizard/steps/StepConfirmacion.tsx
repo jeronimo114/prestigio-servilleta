@@ -67,8 +67,12 @@ export function StepConfirmacion({ onPrev }: Props) {
   return (
     <div className="space-y-6">
       <div className="space-y-2">
-        <div className="text-5xl text-center">🎉</div>
-        <h2 className="text-2xl font-bold text-gray-900 text-center">¡Ya casi terminamos!</h2>
+        <div className="flex justify-center">
+          <svg className="w-14 h-14 text-prestigio-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z" />
+          </svg>
+        </div>
+        <h2 className="text-2xl font-bold text-prestigio-900 text-center">¡Ya casi terminamos!</h2>
         <p className="text-gray-500 text-center text-sm">Revisa el resumen antes de ver tu diagnóstico</p>
       </div>
 
@@ -85,7 +89,7 @@ export function StepConfirmacion({ onPrev }: Props) {
         <button
           onClick={verResultados}
           disabled={cargando}
-          className="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-60 text-white font-bold py-4 rounded-2xl transition-all shadow-md shadow-blue-200 text-base"
+          className="w-full bg-prestigio-900 hover:bg-prestigio-800 disabled:opacity-60 text-white font-bold py-4 rounded-2xl transition-all shadow-md shadow-prestigio-200 text-base"
         >
           {cargando ? 'Calculando indicadores...' : 'Ver mi Diagnóstico Financiero →'}
         </button>

@@ -5,23 +5,23 @@ import { formatearValor } from '@/lib/indicadores'
 
 const SEMAFORO_COLORS = {
   verde: {
-    bg: 'bg-green-50',
-    border: 'border-green-200',
-    badge: 'bg-green-100 text-green-700',
+    bg: 'bg-green-50/80',
+    border: 'border-green-200/70',
+    badge: 'bg-green-100/80 text-green-700',
     dot: 'bg-green-500',
     valor: 'text-green-700',
   },
   amarillo: {
-    bg: 'bg-yellow-50',
-    border: 'border-yellow-200',
-    badge: 'bg-yellow-100 text-yellow-700',
+    bg: 'bg-yellow-50/80',
+    border: 'border-yellow-200/70',
+    badge: 'bg-yellow-100/80 text-yellow-700',
     dot: 'bg-yellow-400',
     valor: 'text-yellow-700',
   },
   rojo: {
-    bg: 'bg-red-50',
-    border: 'border-red-200',
-    badge: 'bg-red-100 text-red-700',
+    bg: 'bg-red-50/80',
+    border: 'border-red-200/70',
+    badge: 'bg-red-100/80 text-red-700',
     dot: 'bg-red-500',
     valor: 'text-red-700',
   },
@@ -43,7 +43,7 @@ export function IndicadorCard({ indicador }: Props) {
   return (
     <div className={`rounded-2xl border-2 p-4 ${colors.bg} ${colors.border}`}>
       <div className="flex items-start justify-between mb-2">
-        <h3 className="text-sm font-semibold text-gray-700 leading-tight pr-2">{indicador.nombre}</h3>
+        <h3 className="text-sm font-semibold text-prestigio-900 leading-tight pr-2">{indicador.nombre}</h3>
         <span className={`flex-shrink-0 text-xs font-medium px-2 py-0.5 rounded-full flex items-center gap-1 ${colors.badge}`}>
           <span className={`w-1.5 h-1.5 rounded-full ${colors.dot}`} />
           {SEMAFORO_LABELS[indicador.semaforo]}
