@@ -94,7 +94,7 @@ const ESTADO_INICIAL = {
   datosAnioAnterior: { ...DATOS_ANTERIORES_PREFILL },
   datosAnioActual: { ...DATOS_ACTUALES_PREFILL },
   pasoActual: 0,
-  totalPasos: 13,
+  totalPasos: 14,
   sessionId: null,
 }
 

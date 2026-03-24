@@ -57,7 +57,8 @@ const STEPS = [
 ]
 
 export default function WizardPage() {
-  const { pasoActual, totalPasos, setPasoActual } = useWizardStore()
+  const { pasoActual, setPasoActual } = useWizardStore()
+  const totalPasos = STEPS.length
   const router = useRouter()
 
   const StepComponent = STEPS[pasoActual]

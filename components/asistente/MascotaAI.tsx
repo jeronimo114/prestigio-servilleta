@@ -61,7 +61,7 @@ export function MascotaAI({ paso, campo }: Props) {
   const [historial, setHistorial] = useState<Message[]>([
     {
       role: 'assistant',
-      content: 'Hola, soy el Asistente Prestigio. Estoy aquí para ayudarte con cualquier duda sobre los datos financieros que estás ingresando.',
+      content: 'Hola, soy PrestIA. Estoy aquí para ayudarte con cualquier duda sobre los datos financieros que estás ingresando.',
     },
   ])
   const [cargando, setCargando] = useState(false)
@@ -148,7 +148,7 @@ export function MascotaAI({ paso, campo }: Props) {
               <div className="flex items-center gap-2">
                 <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center text-sm font-bold text-prestigio-900">P</div>
                 <div>
-                  <p className="text-white font-semibold text-sm">Asistente Prestigio</p>
+                  <p className="text-white font-semibold text-sm">PrestIA</p>
                   <p className="text-prestigio-200 text-xs">Tu guía financiero</p>
                 </div>
               </div>
@@ -276,7 +276,7 @@ export function MascotaAI({ paso, campo }: Props) {
         animate={!abierto ? { y: [0, -4, 0] } : {}}
         transition={!abierto ? { repeat: Infinity, duration: 2.5, ease: 'easeInOut' } : {}}
         className="w-16 h-16 bg-gradient-to-br from-prestigio-900 to-prestigio-700 rounded-full shadow-lg flex items-center justify-center border-4 border-white"
-        title="Habla con el Asistente Prestigio"
+        title="Habla con PrestIA"
       >
         {abierto ? <X size={24} className="text-white" /> : <span className="text-white text-xl font-bold">P</span>}
       </motion.button>
