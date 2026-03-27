@@ -42,7 +42,7 @@ export function StepBienvenida({ onNext }: Props) {
           <span className="text-prestigio-500">Financiera</span>
         </h1>
         <p className="text-gray-600 text-lg max-w-md mx-auto">
-          En 10 minutos vamos a construir juntos el diagnostico financiero de tu empresa, paso a paso.
+          En pocos minutos vamos a construir juntos el diagnostico financiero de tu empresa, paso a paso.
         </p>
       </motion.div>
 

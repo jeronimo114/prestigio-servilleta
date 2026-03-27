@@ -22,7 +22,7 @@ export function StepCostosAnterior({ onNext }: Props) {
       <div className="space-y-5">
         <CampoMoneda
           label="EBITDA"
-          ayuda="Ganancias antes de intereses, impuestos, depreciaciones. Es la 'caja bruta' que genera la operación. Muchas veces puedes calcularlo así: Utilidad Bruta - Gastos de administración - Gastos de ventas"
+          ayuda="EBITDA: ganancias antes de intereses, impuestos y depreciaciones — es la caja operativa pura de tu negocio. Se calcula así: Utilidad Bruta - Gastos de administración - Gastos de ventas"
           valor={d.ebitda}
           onChange={(v) => updateDatosAnterior('ebitda', v)}
           autoFocus
@@ -30,7 +30,7 @@ export function StepCostosAnterior({ onNext }: Props) {
 
         <CampoMoneda
           label="Utilidad Operacional"
-          ayuda="EBITDA menos depreciaciones y amortizaciones. Si no tienes activos fijos importantes, puede ser igual al EBITDA"
+          ayuda="Utilidad Operacional: EBITDA menos depreciaciones y amortizaciones. Si no tienes activos fijos importantes, puede ser igual al EBITDA"
           valor={d.utilidadOperacional}
           onChange={(v) => updateDatosAnterior('utilidadOperacional', v)}
         />
@@ -39,7 +39,7 @@ export function StepCostosAnterior({ onNext }: Props) {
       {d.ebitda > 0 && d.ingresosOperacionales > 0 && (
         <div className="bg-prestigio-50 border border-prestigio-200 rounded-xl p-4">
           <p className="text-sm text-prestigio-700 font-medium">
-            📊 Margen EBITDA: {((d.ebitda / d.ingresosOperacionales) * 100).toFixed(1)}%
+            Margen EBITDA de tu empresa: {((d.ebitda / d.ingresosOperacionales) * 100).toFixed(1)}%
           </p>
           <p className="text-xs text-prestigio-700 mt-1">
             {d.ebitda / d.ingresosOperacionales >= 0.15

@@ -13,7 +13,7 @@ export function StepConfirmacion({ onPrev }: Props) {
   const [cargando, setCargando] = useState(false)
 
   const indAnterior = calcularIndicadores(store.datosAnioAnterior)
-  const indActual = calcularIndicadores(store.datosAnioActual, store.datosAnioAnterior.ingresosOperacionales)
+  const indActual = calcularIndicadores(store.datosAnioActual, store.datosAnioAnterior)
 
   async function verResultados() {
     setCargando(true)

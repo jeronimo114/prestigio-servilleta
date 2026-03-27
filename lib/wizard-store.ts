@@ -55,6 +55,7 @@ const DATOS_ACTUALES_PREFILL: DatosAnio = {
 export interface WizardState {
   // Datos básicos
   nombre: string
+  cedula: string
   empresa: string
   email: string
   sector: string
@@ -72,6 +73,7 @@ export interface WizardState {
 
   // Acciones
   setNombre: (v: string) => void
+  setCedula: (v: string) => void
   setEmpresa: (v: string) => void
   setEmail: (v: string) => void
   setSector: (v: string) => void
@@ -86,6 +88,7 @@ export interface WizardState {
 
 const ESTADO_INICIAL = {
   nombre: 'Carolina Mejía Restrepo',
+  cedula: '1017234567',
   empresa: 'Delicias del Valle S.A.S.',
   email: 'carolina.mejia@deliciasdelvalle.co',
   sector: 'Gastronomía',
@@ -104,6 +107,7 @@ export const useWizardStore = create<WizardState>()(
       ...ESTADO_INICIAL,
 
       setNombre: (v) => set({ nombre: v }),
+      setCedula: (v) => set({ cedula: v }),
       setEmpresa: (v) => set({ empresa: v }),
       setEmail: (v) => set({ email: v }),
       setSector: (v) => set({ sector: v }),

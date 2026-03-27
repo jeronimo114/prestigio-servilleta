@@ -23,7 +23,7 @@ export function StepCostosActual({ onNext }: Props) {
           label="EBITDA"
           valor={d.ebitda}
           onChange={(v) => updateDatosActual('ebitda', v)}
-          ayuda="Utilidad Bruta menos gastos administrativos y de ventas"
+          ayuda="EBITDA: ganancias antes de intereses, impuestos y depreciaciones — es la caja operativa pura de tu negocio"
           autoFocus
         />
 
@@ -31,14 +31,14 @@ export function StepCostosActual({ onNext }: Props) {
           label="Utilidad Operacional"
           valor={d.utilidadOperacional}
           onChange={(v) => updateDatosActual('utilidadOperacional', v)}
-          ayuda="EBITDA menos depreciaciones y amortizaciones"
+          ayuda="Utilidad Operacional: EBITDA menos depreciaciones y amortizaciones"
         />
       </div>
 
       {d.ebitda > 0 && d.ingresosOperacionales > 0 && (
         <div className="bg-prestigio-50 border border-prestigio-200 rounded-xl p-4">
           <p className="text-sm text-prestigio-700 font-medium">
-            📊 Margen EBITDA {anioActual}: {((d.ebitda / d.ingresosOperacionales) * 100).toFixed(1)}%
+            Margen EBITDA de tu empresa ({anioActual}): {((d.ebitda / d.ingresosOperacionales) * 100).toFixed(1)}%
           </p>
         </div>
       )}

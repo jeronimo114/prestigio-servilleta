@@ -22,7 +22,7 @@ export function StepIngresosAnterior({ onNext }: Props) {
       <div className="space-y-5">
         <CampoMoneda
           label="Ingresos Operacionales"
-          ayuda="Todo el dinero que entró por ventas o servicios de tu negocio en el año"
+          ayuda="Ingresos Operacionales: todo el dinero que entró por ventas o servicios de tu negocio en el año"
           valor={d.ingresosOperacionales}
           onChange={(v) => updateDatosAnterior('ingresosOperacionales', v)}
           autoFocus
@@ -30,7 +30,7 @@ export function StepIngresosAnterior({ onNext }: Props) {
 
         <CampoMoneda
           label="Utilidad Bruta"
-          ayuda="Ingresos menos el costo de lo que vendiste o fabricaste. Si vendes ropa y compraste por $30M para venderla en $50M, la utilidad bruta es $20M"
+          ayuda="Utilidad Bruta: ingresos menos el costo de lo que vendiste o fabricaste. Si vendes ropa y compraste por $30M para venderla en $50M, la utilidad bruta es $20M"
           valor={d.utilidadBruta}
           onChange={(v) => updateDatosAnterior('utilidadBruta', v)}
         />
@@ -39,7 +39,7 @@ export function StepIngresosAnterior({ onNext }: Props) {
       {d.ingresosOperacionales > 0 && d.utilidadBruta > 0 && (
         <div className="bg-green-50 border border-green-200 rounded-xl p-4">
           <p className="text-sm text-green-700 font-medium">
-            📊 Margen bruto: {((d.utilidadBruta / d.ingresosOperacionales) * 100).toFixed(1)}%
+            Margen bruto de tu empresa: {((d.utilidadBruta / d.ingresosOperacionales) * 100).toFixed(1)}%
           </p>
           <p className="text-xs text-green-600 mt-1">
             De cada $100 que vendes, ${ ((d.utilidadBruta / d.ingresosOperacionales) * 100).toFixed(0) } quedan para cubrir gastos

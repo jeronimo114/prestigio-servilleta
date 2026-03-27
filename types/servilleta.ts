@@ -31,6 +31,7 @@ export interface DatosAnio {
 
 export interface DatosEmpresa {
   nombre: string
+  cedula: string
   empresa: string
   email: string
   sector: string
@@ -51,11 +52,19 @@ export interface IndicadoresAnio {
   // 1. Liquidez
   ktno: number                         // Cartera + Inventarios - Proveedores
   rotacionCarteraDias: number          // Cartera × 365 / Ingresos
-  rotacionInventariosDias: number      // Inventarios × 365 / Ingresos
-  rotacionProveedoresDias: number      // Proveedores × 365 / Ingresos
+  rotacionInventariosDias: number      // Inventarios × 365 / Costo (Ing - Ut.Bruta)
+  rotacionProveedoresDias: number      // Proveedores × 365 / Costo (Ing - Ut.Bruta)
   cicloFinancieroDias: number          // RotCartera + RotInv - RotProv
   ebitdaIntereses: number              // EBITDA / Intereses
-  pasivoFinancieroEbitda: number       // Total Oblig Fcieras / EBITDA
+  pasivoFinancieroEbitda: number       // Total Oblig Fcieras / EBITDA (años)
+
+  // Flujo de Caja Libre (requiere datos del año anterior)
+  flujoCajaLibre: number               // EBITDA + deltas(Cartera,Inv,AF,Prov) - Impuestos
+  servicioDeudaIntereses: number       // Intereses del período
+  servicioDeudaAmortizacion: number    // Oblig LP / Años deuda LP
+  cambioEnDeuda: number                // Oblig Fcieras actual - anterior
+  cajaPeriodo: number                  // FCL - Intereses - Amortización + Cambio deuda
+  fclSD: number                        // FCL / (Intereses + Amortización)
 
   // 2. Rentabilidad
   crecimientoVentas: number            // % vs año anterior
@@ -64,7 +73,7 @@ export interface IndicadoresAnio {
 
   // 3. Endeudamiento
   endeudamiento: number                // Total Pasivos / Total Activos
-  endeudamientoFinanciero: number      // Total Oblig Fcieras / Total Activos
+  endeudamientoFinanciero: number      // Total Oblig Fcieras / Ingresos
 
   // 4. Palanca de Crecimiento
   palancaCrecimiento: number           // EBITDA / KTNO

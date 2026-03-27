@@ -44,7 +44,7 @@ export function StepIngresosActual({ onNext }: Props) {
       <div className="space-y-5">
         <CampoMoneda
           label="Ingresos Operacionales"
-          ayuda={`Total de ventas o ingresos por servicios en ${anioActual}`}
+          ayuda={`Ingresos Operacionales: todo el dinero que entró por ventas o servicios de tu negocio en ${anioActual}`}
           valor={d.ingresosOperacionales}
           onChange={(v) => updateDatosActual('ingresosOperacionales', v)}
           autoFocus
@@ -52,7 +52,7 @@ export function StepIngresosActual({ onNext }: Props) {
 
         <CampoMoneda
           label="Utilidad Bruta"
-          ayuda="Ingresos menos el costo de lo que vendiste"
+          ayuda="Utilidad Bruta: ingresos menos el costo de lo que vendiste o fabricaste"
           valor={d.utilidadBruta}
           onChange={(v) => updateDatosActual('utilidadBruta', v)}
         />

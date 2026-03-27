@@ -53,7 +53,7 @@ export function StepBalanceActivosAnterior({ onNext }: Props) {
       </div>
 
       <div className="bg-prestigio-100 border-2 border-prestigio-300 rounded-xl p-4">
-        <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Total Activos</p>
+        <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Total Activos de tu empresa</p>
         <p className="text-2xl font-bold text-prestigio-900">
           $ {totalActivos.toLocaleString('es-CO', { maximumFractionDigits: 2 })} M
         </p>

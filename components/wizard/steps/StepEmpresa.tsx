@@ -8,14 +8,14 @@ interface Props {
 }
 
 export function StepEmpresa({ onNext }: Props) {
-  const { nombre, empresa, email, sector, setNombre, setEmpresa, setEmail, setSector } = useWizardStore()
+  const { nombre, cedula, empresa, email, sector, setNombre, setCedula, setEmpresa, setEmail, setSector } = useWizardStore()
 
   const sectores = [
     'Comercio', 'Manufactura', 'Servicios', 'Gastronomía', 'Construcción',
     'Salud', 'Educación', 'Agropecuario', 'Tecnología', 'Otro',
   ]
 
-  const valido = nombre.trim() && empresa.trim()
+  const valido = nombre.trim() && cedula.trim() && empresa.trim() && email.trim()
 
   return (
     <div className="space-y-6">
@@ -38,6 +38,18 @@ export function StepEmpresa({ onNext }: Props) {
         </div>
 
         <div className="space-y-1.5">
+          <label className="block text-sm font-semibold text-gray-700">Tu cédula *</label>
+          <input
+            type="text"
+            value={cedula}
+            onChange={(e) => setCedula(e.target.value)}
+            placeholder="Ej: 1017234567"
+            inputMode="numeric"
+            className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-base focus:border-prestigio-700 focus:outline-none transition-colors"
+          />
+        </div>
+
+        <div className="space-y-1.5">
           <label className="block text-sm font-semibold text-gray-700">Nombre de tu empresa *</label>
           <input
             type="text"
@@ -49,7 +61,7 @@ export function StepEmpresa({ onNext }: Props) {
         </div>
 
         <div className="space-y-1.5">
-          <label className="block text-sm font-semibold text-gray-700">Email (opcional)</label>
+          <label className="block text-sm font-semibold text-gray-700">Email *</label>
           <input
             type="email"
             value={email}

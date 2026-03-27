@@ -25,7 +25,7 @@ export function StepGastosActual({ onNext }: Props) {
           label="Intereses Financieros"
           valor={d.intereses}
           onChange={(v) => updateDatosActual('intereses', v)}
-          ayuda="Intereses pagados a bancos y entidades financieras"
+          ayuda="Intereses Financieros: lo que pagaste de intereses por créditos bancarios, leasing, etc."
           autoFocus
         />
 
@@ -33,19 +33,19 @@ export function StepGastosActual({ onNext }: Props) {
           label="Impuestos"
           valor={d.impuestos}
           onChange={(v) => updateDatosActual('impuestos', v)}
-          ayuda="Impuesto de renta y complementarios pagados"
+          ayuda="Impuestos: renta e impuestos pagados al Estado en el año"
         />
 
         <CampoMoneda
           label="Otros Ingresos / Egresos"
           valor={d.otrosIngresosEgresos}
           onChange={(v) => updateDatosActual('otrosIngresosEgresos', v)}
-          ayuda="Ingresos o gastos no operacionales"
+          ayuda="Otros Ingresos/Egresos: ingresos o gastos que no son parte de la operación principal (arriendos, ventas de activos, multas)"
         />
       </div>
 
       <div className={`border-2 rounded-xl p-4 ${utilidadNeta >= 0 ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}>
-        <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Utilidad Neta {anioActual}</p>
+        <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Utilidad Neta de tu empresa ({anioActual})</p>
         <p className={`text-2xl font-bold ${utilidadNeta >= 0 ? 'text-green-700' : 'text-red-700'}`}>
           $ {utilidadNeta.toLocaleString('es-CO', { maximumFractionDigits: 2 })} M
         </p>

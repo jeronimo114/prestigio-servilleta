@@ -102,6 +102,49 @@ export async function POST(req: NextRequest) {
     setInput('H27', datosAnioActual.capitalSuperavit)
     setInput('H28', datosAnioActual.totalPatrimonio)
 
+    // --- Mini servilleta ---
+    const mini = wb.getWorksheet('Mini servilleta')
+    if (mini) {
+      function setMini(cell: string, value: number | string | Date) {
+        const c = mini!.getCell(cell)
+        c.value = value as ExcelJS.CellValue
+      }
+
+      // Fechas
+      setMini('C2', new Date(anioAnterior, 11, 31))
+      setMini('D2', new Date(anioActual, 11, 31))
+
+      // Estado de Resultados
+      setMini('C5', datosAnioAnterior.ingresosOperacionales)
+      setMini('D5', datosAnioActual.ingresosOperacionales)
+
+      // Costos y gastos = Ingresos - Utilidad Bruta
+      setMini('C6', datosAnioAnterior.ingresosOperacionales - datosAnioAnterior.utilidadBruta)
+      setMini('D6', datosAnioActual.ingresosOperacionales - datosAnioActual.utilidadBruta)
+
+      setMini('C7', datosAnioAnterior.ebitda)
+      setMini('D7', datosAnioActual.ebitda)
+
+      setMini('C8', datosAnioAnterior.intereses)
+      setMini('D8', datosAnioActual.intereses)
+
+      setMini('C9', datosAnioAnterior.impuestos)
+      setMini('D9', datosAnioActual.impuestos)
+
+      // Balance General
+      setMini('C11', datosAnioAnterior.carteraNeta)
+      setMini('D11', datosAnioActual.carteraNeta)
+
+      setMini('C12', datosAnioAnterior.inventarios)
+      setMini('D12', datosAnioActual.inventarios)
+
+      setMini('C13', datosAnioAnterior.activosFijosNetos)
+      setMini('D13', datosAnioActual.activosFijosNetos)
+
+      setMini('C14', datosAnioAnterior.proveedores)
+      setMini('D14', datosAnioActual.proveedores)
+    }
+
     // Generate xlsx buffer
     const buffer = await wb.xlsx.writeBuffer()
 

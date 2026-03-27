@@ -8,6 +8,7 @@ import { useWizardStore } from '@/lib/wizard-store'
 import { calcularIndicadores, indicadoresConSemaforo } from '@/lib/indicadores'
 import { IndicadorCard } from '@/components/resultados/IndicadorCard'
 import { DownloadButton } from '@/components/resultados/DownloadButton'
+import { MascotaAI } from '@/components/asistente/MascotaAI'
 import type { IndicadoresAnio } from '@/types/servilleta'
 
 const CATEGORIAS = [
@@ -78,7 +79,7 @@ export default function ResultadosPage() {
   // Use store data (always available since wizard just completed)
   const { empresa, nombre, anioAnterior, anioActual, datosAnioAnterior, datosAnioActual } = store
 
-  const indActual = calcularIndicadores(datosAnioActual, datosAnioAnterior.ingresosOperacionales)
+  const indActual = calcularIndicadores(datosAnioActual, datosAnioAnterior)
   const indAnterior = calcularIndicadores(datosAnioAnterior)
   const listaIndicadores = indicadoresConSemaforo(indActual)
   const recomendaciones = generarRecomendaciones(indActual)
@@ -242,6 +243,8 @@ export default function ResultadosPage() {
           </button>
         </motion.div>
       </main>
+
+      <MascotaAI paso="resultados" campo="" />
     </div>
   )
 }

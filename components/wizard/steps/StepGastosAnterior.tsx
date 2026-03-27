@@ -24,7 +24,7 @@ export function StepGastosAnterior({ onNext }: Props) {
       <div className="space-y-5">
         <CampoMoneda
           label="Intereses Financieros"
-          ayuda="Lo que pagaste de intereses por créditos bancarios, leasing, etc. Si no tienes deuda, pon 0"
+          ayuda="Intereses Financieros: lo que pagaste de intereses por créditos bancarios, leasing, etc. Si no tienes deuda, pon 0"
           valor={d.intereses}
           onChange={(v) => updateDatosAnterior('intereses', v)}
           autoFocus
@@ -32,14 +32,14 @@ export function StepGastosAnterior({ onNext }: Props) {
 
         <CampoMoneda
           label="Impuestos"
-          ayuda="Renta e impuestos pagados al Estado en el año. Si eres persona natural o no tributas, pon 0"
+          ayuda="Impuestos: renta e impuestos pagados al Estado en el año. Si eres persona natural o no tributas, pon 0"
           valor={d.impuestos}
           onChange={(v) => updateDatosAnterior('impuestos', v)}
         />
 
         <CampoMoneda
           label="Otros Ingresos / Egresos"
-          ayuda="Ingresos o gastos que no son de la operación principal (arriendos recibidos, ventas de activos, multas). Puede ser negativo (escribe el número con signo negativo si es un egreso)"
+          ayuda="Otros Ingresos/Egresos: ingresos o gastos que no son parte de la operación principal (arriendos recibidos, ventas de activos, multas). Puede ser negativo si es un egreso"
           valor={d.otrosIngresosEgresos}
           onChange={(v) => updateDatosAnterior('otrosIngresosEgresos', v)}
         />
@@ -47,7 +47,7 @@ export function StepGastosAnterior({ onNext }: Props) {
 
       {/* Utilidad neta calculada */}
       <div className={`border-2 rounded-xl p-4 ${utilidadNeta >= 0 ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}>
-        <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Utilidad Neta calculada</p>
+        <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Utilidad Neta calculada de tu empresa</p>
         <p className={`text-2xl font-bold ${utilidadNeta >= 0 ? 'text-green-700' : 'text-red-700'}`}>
           $ {utilidadNeta.toLocaleString('es-CO', { maximumFractionDigits: 2 })} M
         </p>
