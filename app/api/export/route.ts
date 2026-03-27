@@ -48,14 +48,19 @@ export async function POST(req: NextRequest) {
     setInput('H57', anioActual)
     setInput('H58', 12)
 
-    // --- Clear column D (third year we don't have) ---
-    const inputRowsD = [7, 8, 9, 10, 11, 12, 13, 16, 17, 18, 19, 21, 22, 24, 25, 27, 28]
-    for (const row of inputRowsD) {
-      setInput(`D${row}`, 0)
+    // --- Clear column D, E, G (third year we don't have) ---
+    // Null out data, percentage, and variation columns so formulas don't produce #DIV/0!
+    const clearRows = [4, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33]
+    for (const row of clearRows) {
+      ws.getCell(`D${row}`).value = null
+      ws.getCell(`E${row}`).value = null
+      ws.getCell(`G${row}`).value = null
     }
-    setInput('D4', new Date(anioAnterior - 1, 11, 31))
-    setInput('D57', anioAnterior - 1)
-    setInput('D58', 12)
+    // Clear indicator rows for column D
+    const indicatorRows = [37, 38, 39, 40, 41, 42, 43, 44, 46, 47, 48, 50, 51, 53, 54, 55, 56, 57, 58, 59]
+    for (const row of indicatorRows) {
+      ws.getCell(`D${row}`).value = null
+    }
 
     // --- Estado de Resultados ---
     // Column F = anioAnterior
