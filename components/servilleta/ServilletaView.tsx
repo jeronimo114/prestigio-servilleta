@@ -1,8 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
+import { motion, AnimatePresence, useAnimationControls } from 'framer-motion'
 import { useWizardStore } from '@/lib/wizard-store'
-import { HelpCircle, X } from 'lucide-react'
+import { HelpCircle, X, CheckCircle2 } from 'lucide-react'
 
 // ── Tooltips ────────────────────────────────────────────────────────
 const TIPS: Record<string, string> = {
@@ -32,6 +33,23 @@ function fmtSigned(n: number): string {
   return `${prefix}${fmt(n)}`
 }
 
+// ── Hook: detectar cambio para animar ───────────────────────────────
+function useValueChanged(value: number) {
+  const prevRef = useRef(value)
+  const [changed, setChanged] = useState(false)
+
+  useEffect(() => {
+    if (prevRef.current !== value) {
+      setChanged(true)
+      prevRef.current = value
+      const timer = setTimeout(() => setChanged(false), 600)
+      return () => clearTimeout(timer)
+    }
+  }, [value])
+
+  return changed
+}
+
 // ── Tooltip flotante ────────────────────────────────────────────────
 function Tooltip({ text }: { text: string }) {
   const [show, setShow] = useState(false)
@@ -48,7 +66,6 @@ function Tooltip({ text }: { text: string }) {
       </button>
       {show && (
         <>
-          {/* Overlay para cerrar al tocar fuera */}
           <div className="fixed inset-0 z-[9998]" onClick={() => setShow(false)} />
           <div className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-72 sm:w-80 bg-prestigio-900 text-white text-sm rounded-2xl px-5 py-4 shadow-2xl z-[9999] leading-relaxed">
             {text}
@@ -63,6 +80,37 @@ function Tooltip({ text }: { text: string }) {
         </>
       )}
     </span>
+  )
+}
+
+// ── Valor animado (pulsa al cambiar) ────────────────────────────────
+function ValorAnimado({
+  valor,
+  className = '',
+  prefix = '$ ',
+  suffix = ' M',
+}: {
+  valor: number
+  className?: string
+  prefix?: string
+  suffix?: string
+}) {
+  const changed = useValueChanged(valor)
+  const controls = useAnimationControls()
+
+  useEffect(() => {
+    if (changed) {
+      controls.start({
+        scale: [1, 1.15, 1],
+        transition: { duration: 0.4, ease: 'easeOut' },
+      })
+    }
+  }, [changed, controls])
+
+  return (
+    <motion.span animate={controls} className={`inline-block ${className}`}>
+      {prefix}{fmt(valor)}{suffix}
+    </motion.span>
   )
 }
 
@@ -109,7 +157,11 @@ function CampoInline({
         onFocus={handleFocus}
         onBlur={handleBlur}
         placeholder="0"
-        className="w-24 sm:w-28 text-right text-sm font-semibold border-b-2 border-amber-400 bg-amber-50/60 px-1.5 py-1 focus:border-amber-600 focus:bg-amber-50 outline-none transition-colors rounded-t-sm"
+        className={`w-24 sm:w-28 text-right text-sm font-semibold border-b-2 border-amber-400 bg-amber-50/60 px-1.5 py-1 outline-none transition-all duration-200 rounded-t-sm ${
+          focused
+            ? 'border-amber-600 bg-amber-50 shadow-[0_2px_8px_rgba(245,158,11,0.25)] scale-[1.02]'
+            : 'hover:bg-amber-50/80'
+        }`}
       />
       <span className="text-gray-400 text-xs">M</span>
       {tip && <Tooltip text={tip} />}
@@ -156,12 +208,16 @@ function CampoTabla({
       onFocus={handleFocus}
       onBlur={handleBlur}
       placeholder="0"
-      className="w-full text-right text-sm font-medium border-b-2 border-amber-400 bg-amber-50/60 px-1 py-0.5 focus:border-amber-600 focus:bg-amber-50 outline-none transition-colors rounded-t-sm"
+      className={`w-full text-right text-sm font-medium border-b-2 border-amber-400 bg-amber-50/60 px-1 py-0.5 outline-none transition-all duration-200 rounded-t-sm ${
+        focused
+          ? 'border-amber-600 bg-amber-50 shadow-[0_2px_8px_rgba(245,158,11,0.25)]'
+          : 'hover:bg-amber-50/80'
+      }`}
     />
   )
 }
 
-// ── Fila calculada ──────────────────────────────────────────────────
+// ── Fila calculada con animación ────────────────────────────────────
 function FilaCalculada({
   label,
   valor,
@@ -171,8 +227,12 @@ function FilaCalculada({
   valor: number
   highlight?: boolean
 }) {
+  const changed = useValueChanged(valor)
+
   return (
-    <div
+    <motion.div
+      animate={changed ? { backgroundColor: ['rgba(0,114,126,0.15)', 'rgba(0,114,126,0)'] } : {}}
+      transition={{ duration: 0.6 }}
       className={`flex items-center justify-between py-2 px-3 ${
         highlight
           ? 'bg-prestigio-100 border-l-4 border-prestigio-600 rounded-r-lg'
@@ -182,10 +242,11 @@ function FilaCalculada({
       <span className={`text-sm ${highlight ? 'font-bold text-prestigio-900' : 'font-semibold text-prestigio-800'}`}>
         {label}
       </span>
-      <span className={`text-sm font-bold ${highlight ? 'text-prestigio-900 text-base' : 'text-prestigio-700'}`}>
-        $ {fmt(valor)} M
-      </span>
-    </div>
+      <ValorAnimado
+        valor={valor}
+        className={`text-sm font-bold ${highlight ? 'text-prestigio-900 text-base' : 'text-prestigio-700'}`}
+      />
+    </motion.div>
   )
 }
 
@@ -200,6 +261,48 @@ function FilaReferencia({ label, valor }: { label: string; valor: number }) {
       </span>
     </div>
   )
+}
+
+// ── Indicador de sección completada ─────────────────────────────────
+function SeccionHeader({
+  titulo,
+  completada,
+  children,
+}: {
+  titulo: string
+  completada: boolean
+  children?: React.ReactNode
+}) {
+  return (
+    <div className="bg-prestigio-900 px-4 py-2 flex items-center justify-between">
+      <h3 className="text-white font-semibold text-sm tracking-wide">{titulo}</h3>
+      <div className="flex items-center gap-2">
+        {children}
+        <AnimatePresence>
+          {completada && (
+            <motion.div
+              initial={{ scale: 0, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0, opacity: 0 }}
+              transition={{ type: 'spring', stiffness: 400, damping: 15 }}
+            >
+              <CheckCircle2 size={18} className="text-green-400" />
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    </div>
+  )
+}
+
+// ── Variantes de animación para secciones ───────────────────────────
+const sectionVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: (i: number) => ({
+    opacity: 1,
+    y: 0,
+    transition: { delay: i * 0.1, duration: 0.4, ease: 'easeOut' as const },
+  }),
 }
 
 // ── Componente principal ────────────────────────────────────────────
@@ -240,24 +343,36 @@ export function ServilletaView({ onNext, onPrev }: Props) {
   // Margen EBITDA
   const margenEbitda = ingresos > 0 ? (ebitda / ingresos) * 100 : 0
 
+  // Secciones completadas
+  const seccion1Completa = ingresos > 0 && costos > 0
+  const seccion2Completa = (act.carteraNeta > 0 || act.inventarios > 0) && act.proveedores > 0
+  const seccion3Completa = seccion1Completa && seccion2Completa
+  const seccion4Completa = seccion3Completa && servDeuda > 0
+
   return (
     <div className="space-y-4">
       {/* Título */}
-      <div className="text-center space-y-1">
+      <motion.div
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="text-center space-y-1"
+      >
         <h2 className="text-xl font-bold text-prestigio-900">Tu Servilleta Financiera</h2>
         <p className="text-sm text-gray-500">
           Llena solo los campos en <span className="inline-block bg-amber-50 border-b-2 border-amber-400 px-1.5 text-amber-700 font-medium text-xs">amarillo</span>
           {' '}y nosotros calculamos el resto
         </p>
-      </div>
+      </motion.div>
 
       {/* ═══ SECCIÓN 1: Estado de Resultados ═══ */}
-      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm">
-        <div className="bg-prestigio-900 px-4 py-2">
-          <h3 className="text-white font-semibold text-sm tracking-wide">
-            Estado de Resultados ({anioActual})
-          </h3>
-        </div>
+      <motion.div
+        custom={0}
+        variants={sectionVariants}
+        initial="hidden"
+        animate="visible"
+        className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm"
+      >
+        <SeccionHeader titulo={`Estado de Resultados (${anioActual})`} completada={seccion1Completa} />
 
         <div className="divide-y divide-gray-100">
           <div className="flex items-center justify-between py-2.5 px-3">
@@ -304,24 +419,33 @@ export function ServilletaView({ onNext, onPrev }: Props) {
           <div className="px-3 py-2 bg-gray-50">
             <p className="text-xs text-gray-500">
               Margen EBITDA:{' '}
-              <span className={`font-bold ${margenEbitda >= 15 ? 'text-green-600' : margenEbitda >= 5 ? 'text-yellow-600' : 'text-red-600'}`}>
+              <motion.span
+                key={margenEbitda.toFixed(1)}
+                initial={{ opacity: 0, y: -4 }}
+                animate={{ opacity: 1, y: 0 }}
+                className={`font-bold inline-block transition-colors duration-500 ${
+                  margenEbitda >= 15 ? 'text-green-600' : margenEbitda >= 5 ? 'text-yellow-600' : 'text-red-600'
+                }`}
+              >
                 {margenEbitda.toFixed(1)}%
-              </span>
+              </motion.span>
               {ingresos > 0 && (
                 <span className="text-gray-400"> — De cada $100 que vendes, ${margenEbitda.toFixed(0)} quedan como EBITDA</span>
               )}
             </p>
           </div>
         </div>
-      </div>
+      </motion.div>
 
       {/* ═══ SECCIÓN 2: Cambios en Capital de Trabajo ═══ */}
-      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm">
-        <div className="bg-prestigio-900 px-4 py-2">
-          <h3 className="text-white font-semibold text-sm tracking-wide">
-            Cambios en Capital de Trabajo ({anioAnterior} → {anioActual})
-          </h3>
-        </div>
+      <motion.div
+        custom={1}
+        variants={sectionVariants}
+        initial="hidden"
+        animate="visible"
+        className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm"
+      >
+        <SeccionHeader titulo={`Cambios en Capital de Trabajo (${anioAnterior} → ${anioActual})`} completada={seccion2Completa} />
 
         {/* Header de tabla */}
         <div className="grid grid-cols-[1fr_5rem_5rem_4rem] sm:grid-cols-[1fr_6rem_6rem_5rem] gap-2 px-3 py-1.5 bg-gray-50 border-b border-gray-200 items-center">
@@ -339,9 +463,7 @@ export function ServilletaView({ onNext, onPrev }: Props) {
             </span>
             <CampoTabla value={ant.carteraNeta} onChange={(v) => store.updateDatosAnterior('carteraNeta', v)} />
             <CampoTabla value={act.carteraNeta} onChange={(v) => store.updateDatosActual('carteraNeta', v)} />
-            <span className={`text-sm font-medium text-right ${deltaCartera >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-              {fmtSigned(deltaCartera)}
-            </span>
+            <CambioAnimado valor={deltaCartera} />
           </div>
 
           {/* Inventarios */}
@@ -351,9 +473,7 @@ export function ServilletaView({ onNext, onPrev }: Props) {
             </span>
             <CampoTabla value={ant.inventarios} onChange={(v) => store.updateDatosAnterior('inventarios', v)} />
             <CampoTabla value={act.inventarios} onChange={(v) => store.updateDatosActual('inventarios', v)} />
-            <span className={`text-sm font-medium text-right ${deltaInventarios >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-              {fmtSigned(deltaInventarios)}
-            </span>
+            <CambioAnimado valor={deltaInventarios} />
           </div>
 
           {/* Proveedores */}
@@ -363,9 +483,7 @@ export function ServilletaView({ onNext, onPrev }: Props) {
             </span>
             <CampoTabla value={ant.proveedores} onChange={(v) => store.updateDatosAnterior('proveedores', v)} />
             <CampoTabla value={act.proveedores} onChange={(v) => store.updateDatosActual('proveedores', v)} />
-            <span className={`text-sm font-medium text-right ${deltaProveedores >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-              {fmtSigned(deltaProveedores)}
-            </span>
+            <CambioAnimado valor={deltaProveedores} />
           </div>
 
           <FilaCalculada label="= Cambio Capital de Trabajo" valor={cambioKTNO} />
@@ -377,22 +495,22 @@ export function ServilletaView({ onNext, onPrev }: Props) {
             </span>
             <CampoTabla value={ant.activosFijosNetos} onChange={(v) => store.updateDatosAnterior('activosFijosNetos', v)} />
             <CampoTabla value={act.activosFijosNetos} onChange={(v) => store.updateDatosActual('activosFijosNetos', v)} />
-            <span className={`text-sm font-medium text-right ${deltaAF >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-              {fmtSigned(deltaAF)}
-            </span>
+            <CambioAnimado valor={deltaAF} />
           </div>
 
           <FilaCalculada label="= Cambio CAPEX" valor={deltaAF} />
         </div>
-      </div>
+      </motion.div>
 
       {/* ═══ SECCIÓN 3: Flujo de Caja Libre ═══ */}
-      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm">
-        <div className="bg-prestigio-900 px-4 py-2">
-          <h3 className="text-white font-semibold text-sm tracking-wide">
-            Flujo de Caja Libre
-          </h3>
-        </div>
+      <motion.div
+        custom={2}
+        variants={sectionVariants}
+        initial="hidden"
+        animate="visible"
+        className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm"
+      >
+        <SeccionHeader titulo="Flujo de Caja Libre" completada={seccion3Completa} />
 
         <div className="divide-y divide-gray-100">
           <FilaReferencia label="EBITDA" valor={ebitda} />
@@ -410,15 +528,17 @@ export function ServilletaView({ onNext, onPrev }: Props) {
 
           <FilaCalculada label="= Flujo de Caja Libre" valor={fcl} highlight />
         </div>
-      </div>
+      </motion.div>
 
       {/* ═══ SECCIÓN 4: Caja Final ═══ */}
-      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm">
-        <div className="bg-prestigio-900 px-4 py-2">
-          <h3 className="text-white font-semibold text-sm tracking-wide">
-            Caja Final
-          </h3>
-        </div>
+      <motion.div
+        custom={3}
+        variants={sectionVariants}
+        initial="hidden"
+        animate="visible"
+        className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm"
+      >
+        <SeccionHeader titulo="Caja Final" completada={seccion4Completa} />
 
         <div className="divide-y divide-gray-100">
           <FilaReferencia label="Flujo de Caja Libre" valor={fcl} />
@@ -442,16 +562,23 @@ export function ServilletaView({ onNext, onPrev }: Props) {
           </div>
 
           {/* Caja Final */}
-          <div className={`flex items-center justify-between py-3 px-3 border-l-4 ${
-            cajaFinal >= 0
-              ? 'bg-green-50 border-green-500'
-              : 'bg-red-50 border-red-500'
-          }`}>
+          <motion.div
+            animate={
+              cajaFinal >= 0
+                ? { backgroundColor: 'rgba(240, 253, 244, 1)' }
+                : { backgroundColor: 'rgba(254, 242, 242, 1)' }
+            }
+            transition={{ duration: 0.5 }}
+            className={`flex items-center justify-between py-3 px-3 border-l-4 transition-colors duration-500 ${
+              cajaFinal >= 0 ? 'border-green-500' : 'border-red-500'
+            }`}
+          >
             <span className="text-base font-bold text-gray-900">= CAJA FINAL</span>
-            <span className={`text-base font-bold ${cajaFinal >= 0 ? 'text-green-700' : 'text-red-700'}`}>
-              $ {fmt(cajaFinal)} M
-            </span>
-          </div>
+            <ValorAnimado
+              valor={cajaFinal}
+              className={`text-base font-bold ${cajaFinal >= 0 ? 'text-green-700' : 'text-red-700'}`}
+            />
+          </motion.div>
 
           {/* Interpretación */}
           <div className="px-3 py-2 bg-gray-50">
@@ -463,10 +590,16 @@ export function ServilletaView({ onNext, onPrev }: Props) {
             </p>
           </div>
         </div>
-      </div>
+      </motion.div>
 
       {/* Botones */}
-      <div className="flex gap-3 pt-2">
+      <motion.div
+        custom={4}
+        variants={sectionVariants}
+        initial="hidden"
+        animate="visible"
+        className="flex gap-3 pt-2"
+      >
         <button
           onClick={onPrev}
           className="flex-1 border-2 border-gray-300 text-gray-600 font-semibold py-3 rounded-xl hover:border-gray-400 hover:bg-gray-50 transition-all"
@@ -479,7 +612,22 @@ export function ServilletaView({ onNext, onPrev }: Props) {
         >
           Ver mi Diagnóstico →
         </button>
-      </div>
+      </motion.div>
     </div>
+  )
+}
+
+// ── Cambio animado (columna "Cambio" en tabla) ──────────────────────
+function CambioAnimado({ valor }: { valor: number }) {
+  const changed = useValueChanged(valor)
+
+  return (
+    <motion.span
+      animate={changed ? { scale: [1, 1.2, 1] } : {}}
+      transition={{ duration: 0.3 }}
+      className={`text-sm font-medium text-right ${valor >= 0 ? 'text-green-600' : 'text-red-600'}`}
+    >
+      {fmtSigned(valor)}
+    </motion.span>
   )
 }
