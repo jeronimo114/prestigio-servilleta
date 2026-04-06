@@ -8,20 +8,28 @@ interface Props {
 }
 
 export function StepEmpresa({ onNext }: Props) {
-  const { nombre, cedula, empresa, email, sector, setNombre, setCedula, setEmpresa, setEmail, setSector } = useWizardStore()
+  const {
+    nombre, cedula, empresa, email, sector,
+    anioAnterior, anioActual,
+    setNombre, setCedula, setEmpresa, setEmail, setSector,
+    setAnioAnterior, setAnioActual,
+  } = useWizardStore()
 
   const sectores = [
-    'Comercio', 'Manufactura', 'Servicios', 'Gastronomía', 'Construcción',
-    'Salud', 'Educación', 'Agropecuario', 'Tecnología', 'Otro',
+    'Comercio', 'Manufactura', 'Servicios', 'Gastronomia', 'Construccion',
+    'Salud', 'Educacion', 'Agropecuario', 'Tecnologia', 'Otro',
   ]
+
+  const anioActualReal = new Date().getFullYear()
+  const aniosDisponibles = Array.from({ length: 8 }, (_, i) => anioActualReal - i)
 
   const valido = nombre.trim() && cedula.trim() && empresa.trim() && email.trim()
 
   return (
     <div className="space-y-6">
       <div className="space-y-2">
-        <h2 className="text-2xl font-bold text-prestigio-900">¿Quién eres tú?</h2>
-        <p className="text-gray-500">Cuéntanos un poco sobre ti y tu empresa</p>
+        <h2 className="text-2xl font-bold text-prestigio-900">Tu empresa</h2>
+        <p className="text-gray-500">Cuentanos sobre ti y los periodos a analizar</p>
       </div>
 
       <div className="space-y-4">
@@ -31,14 +39,14 @@ export function StepEmpresa({ onNext }: Props) {
             type="text"
             value={nombre}
             onChange={(e) => setNombre(e.target.value)}
-            placeholder="Ej: María García"
+            placeholder="Ej: Maria Garcia"
             autoFocus
             className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-base focus:border-prestigio-700 focus:outline-none transition-colors"
           />
         </div>
 
         <div className="space-y-1.5">
-          <label className="block text-sm font-semibold text-gray-700">Tu cédula *</label>
+          <label className="block text-sm font-semibold text-gray-700">Tu cedula *</label>
           <input
             type="text"
             value={cedula}
@@ -72,7 +80,7 @@ export function StepEmpresa({ onNext }: Props) {
         </div>
 
         <div className="space-y-1.5">
-          <label className="block text-sm font-semibold text-gray-700">Sector económico</label>
+          <label className="block text-sm font-semibold text-gray-700">Sector economico</label>
           <div className="grid grid-cols-2 gap-2">
             {sectores.map((s) => (
               <button
@@ -89,6 +97,44 @@ export function StepEmpresa({ onNext }: Props) {
             ))}
           </div>
         </div>
+
+        {/* Periodos - integrado */}
+        <div className="pt-2 border-t border-gray-200">
+          <p className="text-sm font-semibold text-gray-700 mb-3">Periodos a comparar</p>
+          <div className="flex gap-3">
+            <div className="flex-1 space-y-1">
+              <label className="block text-xs text-gray-500">Ano anterior</label>
+              <select
+                value={anioAnterior}
+                onChange={(e) => {
+                  const val = parseInt(e.target.value)
+                  setAnioAnterior(val)
+                  if (anioActual <= val) setAnioActual(val + 1)
+                }}
+                className="w-full border-2 border-gray-200 rounded-xl px-3 py-2.5 text-base focus:border-prestigio-700 focus:outline-none transition-colors bg-white"
+              >
+                {aniosDisponibles.map((a) => (
+                  <option key={a} value={a}>{a}</option>
+                ))}
+              </select>
+            </div>
+            <div className="flex items-end pb-3 text-gray-400">→</div>
+            <div className="flex-1 space-y-1">
+              <label className="block text-xs text-gray-500">Ano actual</label>
+              <select
+                value={anioActual}
+                onChange={(e) => setAnioActual(parseInt(e.target.value))}
+                className="w-full border-2 border-gray-200 rounded-xl px-3 py-2.5 text-base focus:border-prestigio-700 focus:outline-none transition-colors bg-white"
+              >
+                {aniosDisponibles
+                  .filter((a) => a > anioAnterior)
+                  .map((a) => (
+                    <option key={a} value={a}>{a}</option>
+                  ))}
+              </select>
+            </div>
+          </div>
+        </div>
       </div>
 
       <button
@@ -96,7 +142,7 @@ export function StepEmpresa({ onNext }: Props) {
         disabled={!valido}
         className="w-full bg-prestigio-900 hover:bg-prestigio-800 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-4 rounded-2xl text-base transition-all shadow-md shadow-prestigio-200"
       >
-        Continuar →
+        Continuar a la Servilleta →
       </button>
     </div>
   )

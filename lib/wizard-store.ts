@@ -5,13 +5,16 @@ import { persist } from 'zustand/middleware'
 import type { DatosAnio } from '@/types/servilleta'
 
 // Datos pre-llenados realistas: empresa ficticia "Delicias del Valle"
-// Cadena de restaurantes mediana en Colombia, sector Gastronomía
+// Cadena de restaurantes mediana en Colombia, sector Gastronomia
 const DATOS_ANTERIORES_PREFILL: DatosAnio = {
   // Estado de Resultados 2024 (en millones COP)
   ingresosOperacionales: 4850,
-  utilidadBruta: 2185,
-  ebitda: 825,
-  utilidadOperacional: 680,
+  costosTotales: 2665,             // Ingresos - Utilidad Bruta = 4850 - 2185
+  gastosTotales: 1505,             // Utilidad Bruta - Utilidad Op = 2185 - 680
+  depreciacionesAmortizaciones: 145, // EBITDA - Utilidad Op = 825 - 680
+  utilidadBruta: 2185,             // calculado: 4850 - 2665
+  ebitda: 825,                     // calculado: 680 + 145
+  utilidadOperacional: 680,        // calculado: 4850 - 2665 - 1505
   intereses: 145,
   impuestos: 178,
   otrosIngresosEgresos: 32,
@@ -27,14 +30,20 @@ const DATOS_ANTERIORES_PREFILL: DatosAnio = {
   otrosPasivos: 290,
   capitalSuperavit: 650,
   totalPatrimonio: 1000,
+  // Servilleta
+  servicioDeuda: 535,              // intereses 145 + amortizacion (780/2=390)
+  dividendos: 0,
 }
 
 const DATOS_ACTUALES_PREFILL: DatosAnio = {
   // Estado de Resultados 2025 (en millones COP)
   ingresosOperacionales: 5620,
-  utilidadBruta: 2640,
-  ebitda: 1015,
-  utilidadOperacional: 845,
+  costosTotales: 2980,             // 5620 - 2640
+  gastosTotales: 1795,             // 2640 - 845
+  depreciacionesAmortizaciones: 170, // 1015 - 845
+  utilidadBruta: 2640,             // calculado: 5620 - 2980
+  ebitda: 1015,                    // calculado: 845 + 170
+  utilidadOperacional: 845,        // calculado: 5620 - 2980 - 1795
   intereses: 132,
   impuestos: 225,
   otrosIngresosEgresos: 18,
@@ -50,10 +59,13 @@ const DATOS_ACTUALES_PREFILL: DatosAnio = {
   otrosPasivos: 315,
   capitalSuperavit: 750,
   totalPatrimonio: 1465,
+  // Servilleta
+  servicioDeuda: 487,              // intereses 132 + amortizacion (710/2=355)
+  dividendos: 50,
 }
 
 export interface WizardState {
-  // Datos básicos
+  // Datos basicos
   nombre: string
   cedula: string
   empresa: string
@@ -62,7 +74,7 @@ export interface WizardState {
   anioAnterior: number
   anioActual: number
 
-  // Datos por año
+  // Datos por ano
   datosAnioAnterior: DatosAnio
   datosAnioActual: DatosAnio
 
@@ -86,18 +98,26 @@ export interface WizardState {
   reset: () => void
 }
 
+// Recalcula los campos derivados del P&G a partir de los inputs
+function recalcularDerivados(datos: DatosAnio): DatosAnio {
+  const utilidadBruta = datos.ingresosOperacionales - datos.costosTotales
+  const utilidadOperacional = utilidadBruta - datos.gastosTotales
+  const ebitda = utilidadOperacional + datos.depreciacionesAmortizaciones
+  return { ...datos, utilidadBruta, utilidadOperacional, ebitda }
+}
+
 const ESTADO_INICIAL = {
-  nombre: 'Carolina Mejía Restrepo',
+  nombre: 'Carolina Mejia Restrepo',
   cedula: '1017234567',
   empresa: 'Delicias del Valle S.A.S.',
   email: 'carolina.mejia@deliciasdelvalle.co',
-  sector: 'Gastronomía',
+  sector: 'Gastronomia',
   anioAnterior: 2024,
   anioActual: 2025,
   datosAnioAnterior: { ...DATOS_ANTERIORES_PREFILL },
   datosAnioActual: { ...DATOS_ACTUALES_PREFILL },
   pasoActual: 0,
-  totalPasos: 14,
+  totalPasos: 4,
   sessionId: null,
 }
 
@@ -116,12 +136,12 @@ export const useWizardStore = create<WizardState>()(
 
       updateDatosAnterior: (campo, valor) =>
         set((state) => ({
-          datosAnioAnterior: { ...state.datosAnioAnterior, [campo]: valor },
+          datosAnioAnterior: recalcularDerivados({ ...state.datosAnioAnterior, [campo]: valor }),
         })),
 
       updateDatosActual: (campo, valor) =>
         set((state) => ({
-          datosAnioActual: { ...state.datosAnioActual, [campo]: valor },
+          datosAnioActual: recalcularDerivados({ ...state.datosAnioActual, [campo]: valor }),
         })),
 
       setPasoActual: (paso) => set({ pasoActual: paso }),

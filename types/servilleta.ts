@@ -1,32 +1,37 @@
 // Datos ingresados por el usuario para UN año
 export interface DatosAnio {
-  // Estado de Resultados
+  // Estado de Resultados — inputs del usuario
   ingresosOperacionales: number
-  utilidadBruta: number
-  ebitda: number
-  utilidadOperacional: number
-  intereses: number
+  costosTotales: number              // Costos de ventas / producción
+  gastosTotales: number              // Gastos operacionales (admin + ventas)
+  depreciacionesAmortizaciones: number // Si no tiene, pone 0
+
+  // Calculados del P&G (no los llena el usuario)
+  utilidadBruta: number              // = ingresos - costos
+  ebitda: number                     // = utilidadOperacional + dep&amort
+  utilidadOperacional: number        // = ingresos - costos - gastos
+  intereses: number                  // Parte del servicio de la deuda
   impuestos: number
   otrosIngresosEgresos: number
-  // Calculado: utilidadNeta = utilidadOperacional - intereses - impuestos + otrosIngresosEgresos
 
-  // Balance General
+  // Balance General — solo cartera, inventarios, activos fijos, proveedores
   carteraNeta: number
   inventarios: number
   activosFijosNetos: number
   otrosActivos: number
-  // Calculado: totalActivos
 
   obligacionesFinancierasCP: number
   obligacionesFinancierasLP: number
-  // Calculado: totalObligacionesFinancieras
 
   proveedores: number
   otrosPasivos: number
-  // Calculado: totalPasivos
 
   capitalSuperavit: number
   totalPatrimonio: number
+
+  // Servilleta: campos adicionales para flujo de caja
+  servicioDeuda: number              // Intereses + abono a capital
+  dividendos: number                 // Dividendos / capitalización
 }
 
 export interface DatosEmpresa {
@@ -35,9 +40,9 @@ export interface DatosEmpresa {
   empresa: string
   email: string
   sector: string
-  anioAnterior: number  // ej: 2022
-  anioActual: number    // ej: 2023
-  anioProyectado: number // ej: 2024
+  anioAnterior: number  // ej: 2024
+  anioActual: number    // ej: 2025
+  anioProyectado: number // ej: 2026
   datosAnioAnterior: DatosAnio
   datosAnioActual: DatosAnio
 }
@@ -51,23 +56,23 @@ export interface IndicadoresAnio {
 
   // 1. Liquidez
   ktno: number                         // Cartera + Inventarios - Proveedores
-  rotacionCarteraDias: number          // Cartera × 365 / Ingresos
-  rotacionInventariosDias: number      // Inventarios × 365 / Costo (Ing - Ut.Bruta)
-  rotacionProveedoresDias: number      // Proveedores × 365 / Costo (Ing - Ut.Bruta)
+  rotacionCarteraDias: number          // Cartera x 365 / Ingresos
+  rotacionInventariosDias: number      // Inventarios x 365 / Costo
+  rotacionProveedoresDias: number      // Proveedores x 365 / Costo
   cicloFinancieroDias: number          // RotCartera + RotInv - RotProv
   ebitdaIntereses: number              // EBITDA / Intereses
-  pasivoFinancieroEbitda: number       // Total Oblig Fcieras / EBITDA (años)
+  pasivoFinancieroEbitda: number       // Total Oblig Fcieras / EBITDA (anos)
 
-  // Flujo de Caja Libre (requiere datos del año anterior)
+  // Flujo de Caja Libre (requiere datos del ano anterior)
   flujoCajaLibre: number               // EBITDA + deltas(Cartera,Inv,AF,Prov) - Impuestos
-  servicioDeudaIntereses: number       // Intereses del período
-  servicioDeudaAmortizacion: number    // Oblig LP / Años deuda LP
+  servicioDeudaIntereses: number       // Intereses del periodo
+  servicioDeudaAmortizacion: number    // Oblig LP / Anos deuda LP
   cambioEnDeuda: number                // Oblig Fcieras actual - anterior
-  cajaPeriodo: number                  // FCL - Intereses - Amortización + Cambio deuda
-  fclSD: number                        // FCL / (Intereses + Amortización)
+  cajaPeriodo: number                  // FCL - Intereses - Amortizacion + Cambio deuda
+  fclSD: number                        // FCL / (Intereses + Amortizacion)
 
   // 2. Rentabilidad
-  crecimientoVentas: number            // % vs año anterior
+  crecimientoVentas: number            // % vs ano anterior
   margenEbitda: number                 // EBITDA / Ingresos
   margenNeto: number                   // Utilidad Neta / Ingresos
 
@@ -96,19 +101,9 @@ export interface IndicadorConSemaforo {
   formato: 'porcentaje' | 'numero' | 'dias' | 'veces'
 }
 
-// Wizard step IDs
+// Wizard step IDs (simplificado: bienvenida → empresa → servilleta → confirmacion)
 export type WizardStep =
   | 'bienvenida'
   | 'empresa'
-  | 'periodos'
-  | 'ingresos-anterior'
-  | 'costos-anterior'
-  | 'gastos-anterior'
-  | 'balance-activos-anterior'
-  | 'balance-pasivos-anterior'
-  | 'ingresos-actual'
-  | 'costos-actual'
-  | 'gastos-actual'
-  | 'balance-activos-actual'
-  | 'balance-pasivos-actual'
+  | 'servilleta'
   | 'confirmacion'

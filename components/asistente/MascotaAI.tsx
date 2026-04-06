@@ -7,40 +7,35 @@ import type { Message } from '@/lib/ai-client'
 
 // FAQs contextuales por paso del wizard
 const FAQS_POR_PASO: Record<string, string[]> = {
-  'Datos básicos': [
-    '¿Por qué necesitan mi email?',
+  'Datos basicos': [
     '¿Mis datos son confidenciales?',
-    '¿Qué sector elijo si tengo varios?',
+    '¿Que sector elijo si tengo varios?',
   ],
-  'Períodos': [
-    '¿Qué pasa si mi empresa tiene menos de 2 años?',
-    '¿Puedo usar el mismo año en ambos campos?',
-    '¿Qué es un período contable?',
+  'Servilleta': [
+    '¿Que son los Ingresos Operacionales?',
+    '¿Que son Costos vs Gastos?',
+    '¿Que es el EBITDA y por que importa?',
+    '¿Que es el Capital de Trabajo (KTNO)?',
+    '¿Que son Depreciaciones y Amortizaciones?',
+    '¿Como calculo el Servicio de la Deuda?',
+    '¿Que es el Flujo de Caja Libre?',
   ],
-  'Estado de resultados': [
-    '¿Qué son los Ingresos Operacionales?',
-    '¿Cómo calculo la Utilidad Bruta?',
-    '¿Qué es el EBITDA?',
-    '¿Qué incluye en Utilidad Operacional?',
-    '¿Cómo sé cuántos intereses pagué?',
+  'Confirmacion': [
+    '¿Puedo cambiar un dato despues?',
+    '¿Que indicadores me van a calcular?',
+    '¿Que es la Palanca de Crecimiento?',
   ],
-  'Balance General': [
-    '¿Qué es la Cartera Neta?',
-    '¿Qué van en Otros Activos?',
-    '¿Cuál es la diferencia entre deuda CP y LP?',
-    '¿Qué incluye en Otros Pasivos?',
-    '¿Cómo calculo el Patrimonio?',
-  ],
-  'Confirmación': [
-    '¿Puedo cambiar un dato después?',
-    '¿Qué indicadores me van a calcular?',
-    '¿Qué es la Palanca de Crecimiento?',
+  'resultados': [
+    '¿Que significa el semaforo rojo?',
+    '¿Como mejoro mi margen EBITDA?',
+    '¿Que es la Palanca de Crecimiento?',
+    '¿Como interpreto el Flujo de Caja Libre?',
   ],
   'default': [
-    '¿Qué es el EBITDA?',
-    '¿Para qué sirve la servilleta financiera?',
-    '¿Qué es el KTNO?',
-    '¿Cómo interpreto los semáforos?',
+    '¿Que es el EBITDA?',
+    '¿Para que sirve la servilleta financiera?',
+    '¿Que es el KTNO?',
+    '¿Como interpreto los semaforos?',
   ],
 }
 

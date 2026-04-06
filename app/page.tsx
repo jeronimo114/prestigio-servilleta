@@ -25,15 +25,15 @@ export default function HomePage() {
             Servilleta<br />Financiera
           </h1>
           <p className="font-serif italic text-white/70 text-lg max-w-sm mx-auto leading-relaxed">
-            Tu diagnóstico financiero, sin complicaciones
+            Tu cuenta de tienda, hecha servilleta
           </p>
         </div>
 
         {/* Features */}
         <div className="grid grid-cols-3 gap-3 pt-2">
           {[
-            { icon: '✦', titulo: 'Guiado', desc: 'Una pregunta a la vez' },
-            { icon: '◎', titulo: 'IA incluida', desc: 'Asistente integrado' },
+            { icon: '✦', titulo: 'Simple', desc: 'Una sola pantalla' },
+            { icon: '◎', titulo: 'IA incluida', desc: 'Resuelve tus dudas' },
             { icon: '↓', titulo: 'Excel listo', desc: 'Descarga tu servilleta' },
           ].map((f) => (
             <div key={f.titulo} className="bg-white/10 rounded-2xl p-5 border border-white/10">
