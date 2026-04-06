@@ -16,8 +16,8 @@ export function StepEmpresa({ onNext }: Props) {
   } = useWizardStore()
 
   const sectores = [
-    'Comercio', 'Manufactura', 'Servicios', 'Gastronomia', 'Construccion',
-    'Salud', 'Educacion', 'Agropecuario', 'Tecnologia', 'Otro',
+    'Comercio', 'Manufactura', 'Servicios', 'Gastronomía', 'Construcción',
+    'Salud', 'Educación', 'Agropecuario', 'Tecnología', 'Otro',
   ]
 
   const anioActualReal = new Date().getFullYear()
@@ -29,7 +29,7 @@ export function StepEmpresa({ onNext }: Props) {
     <div className="space-y-6">
       <div className="space-y-2">
         <h2 className="text-2xl font-bold text-prestigio-900">Tu empresa</h2>
-        <p className="text-gray-500">Cuentanos sobre ti y los periodos a analizar</p>
+        <p className="text-gray-500">Cuéntanos sobre ti y los períodos a analizar</p>
       </div>
 
       <div className="space-y-4">
@@ -39,14 +39,14 @@ export function StepEmpresa({ onNext }: Props) {
             type="text"
             value={nombre}
             onChange={(e) => setNombre(e.target.value)}
-            placeholder="Ej: Maria Garcia"
+            placeholder="Ej: María García"
             autoFocus
             className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-base focus:border-prestigio-700 focus:outline-none transition-colors"
           />
         </div>
 
         <div className="space-y-1.5">
-          <label className="block text-sm font-semibold text-gray-700">Tu cedula *</label>
+          <label className="block text-sm font-semibold text-gray-700">Tu cédula *</label>
           <input
             type="text"
             value={cedula}
@@ -80,7 +80,7 @@ export function StepEmpresa({ onNext }: Props) {
         </div>
 
         <div className="space-y-1.5">
-          <label className="block text-sm font-semibold text-gray-700">Sector economico</label>
+          <label className="block text-sm font-semibold text-gray-700">Sector económico</label>
           <div className="grid grid-cols-2 gap-2">
             {sectores.map((s) => (
               <button
@@ -98,12 +98,12 @@ export function StepEmpresa({ onNext }: Props) {
           </div>
         </div>
 
-        {/* Periodos - integrado */}
+        {/* Períodos */}
         <div className="pt-2 border-t border-gray-200">
-          <p className="text-sm font-semibold text-gray-700 mb-3">Periodos a comparar</p>
+          <p className="text-sm font-semibold text-gray-700 mb-3">Períodos a comparar</p>
           <div className="flex gap-3">
             <div className="flex-1 space-y-1">
-              <label className="block text-xs text-gray-500">Ano anterior</label>
+              <label className="block text-xs text-gray-500">Año anterior</label>
               <select
                 value={anioAnterior}
                 onChange={(e) => {
@@ -120,7 +120,7 @@ export function StepEmpresa({ onNext }: Props) {
             </div>
             <div className="flex items-end pb-3 text-gray-400">→</div>
             <div className="flex-1 space-y-1">
-              <label className="block text-xs text-gray-500">Ano actual</label>
+              <label className="block text-xs text-gray-500">Año actual</label>
               <select
                 value={anioActual}
                 onChange={(e) => setAnioActual(parseInt(e.target.value))}

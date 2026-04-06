@@ -12,13 +12,13 @@ export function calcularDerivedosAnio(datos: DatosAnio): {
   totalPasivos: number
 } {
   // Derivados del P&G usando nuevos campos
-  const utilidadOperacional = datos.ingresosOperacionales - datos.costosTotales - datos.gastosTotales
-  const ebitda = utilidadOperacional + datos.depreciacionesAmortizaciones
+  const utilidadOperacional = (datos.ingresosOperacionales || 0) - (datos.costosTotales || 0) - (datos.gastosTotales || 0)
+  const ebitda = utilidadOperacional + (datos.depreciacionesAmortizaciones || 0)
   const intereses = datos.intereses || (datos.servicioDeuda > 0 ? datos.servicioDeuda * 0.3 : 0)
-  const utilidadNeta = utilidadOperacional - intereses - datos.impuestos + datos.otrosIngresosEgresos
+  const utilidadNeta = utilidadOperacional - (intereses || 0) - (datos.impuestos || 0) + (datos.otrosIngresosEgresos || 0)
 
   const totalActivos =
-    datos.carteraNeta + datos.inventarios + datos.activosFijosNetos + datos.otrosActivos
+    (datos.carteraNeta || 0) + (datos.inventarios || 0) + (datos.activosFijosNetos || 0) + (datos.otrosActivos || 0)
   const totalObligacionesFinancieras =
     datos.obligacionesFinancierasCP + datos.obligacionesFinancierasLP
   const totalPasivos =
@@ -175,7 +175,7 @@ export function indicadoresConSemaforo(ind: IndicadoresAnio): IndicadorConSemafo
       nombre: 'Margen EBITDA',
       valor: ind.margenEbitda,
       semaforo: semaforo('margenEbitda', ind.margenEbitda),
-      descripcion: 'Que porcentaje de tus ventas se convierte en EBITDA',
+      descripcion: 'Qué porcentaje de tus ventas se convierte en EBITDA',
       formato: 'porcentaje',
     },
     {
@@ -189,7 +189,7 @@ export function indicadoresConSemaforo(ind: IndicadoresAnio): IndicadorConSemafo
       nombre: 'Crecimiento en Ventas',
       valor: ind.crecimientoVentas,
       semaforo: semaforo('crecimientoVentas', ind.crecimientoVentas),
-      descripcion: 'Crecimiento de ingresos vs ano anterior',
+      descripcion: 'Crecimiento de ingresos vs año anterior',
       formato: 'porcentaje',
     },
     // Liquidez
@@ -204,14 +204,14 @@ export function indicadoresConSemaforo(ind: IndicadoresAnio): IndicadorConSemafo
       nombre: 'Pasivo Financiero / EBITDA',
       valor: ind.pasivoFinancieroEbitda,
       semaforo: semaforo('pasivoFinancieroEbitda', ind.pasivoFinancieroEbitda),
-      descripcion: 'Anos necesarios para pagar deuda financiera con EBITDA',
+      descripcion: 'Años necesarios para pagar deuda financiera con EBITDA',
       formato: 'veces',
     },
     {
       nombre: 'Ciclo Financiero',
       valor: ind.cicloFinancieroDias,
       semaforo: semaforo('cicloFinancieroDias', ind.cicloFinancieroDias),
-      descripcion: 'Dias que tardas en convertir inventario en caja',
+      descripcion: 'Días que tardas en convertir inventario en caja',
       formato: 'dias',
     },
     // Endeudamiento
@@ -256,7 +256,7 @@ export function formatearValor(valor: number, formato: IndicadorConSemaforo['for
     case 'veces':
       return `${valor.toFixed(2)}x`
     case 'dias':
-      return `${Math.round(valor)} dias`
+      return `${Math.round(valor)} días`
     case 'numero':
       return valor.toLocaleString('es-CO')
   }

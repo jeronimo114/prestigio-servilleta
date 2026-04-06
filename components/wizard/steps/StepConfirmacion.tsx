@@ -73,7 +73,7 @@ export function StepConfirmacion({ onPrev }: Props) {
           </svg>
         </div>
         <h2 className="text-2xl font-bold text-prestigio-900 text-center">¡Ya casi terminamos!</h2>
-        <p className="text-gray-500 text-center text-sm">Revisa el resumen antes de ver tu diagnóstico</p>
+        <p className="text-gray-500 text-center text-sm">Revisa el resumen antes de ver tu diagnóstico financiero</p>
       </div>
 
       <div className="bg-white border border-gray-200 rounded-2xl divide-y divide-gray-100 overflow-hidden">

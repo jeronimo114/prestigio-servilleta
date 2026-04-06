@@ -42,7 +42,7 @@ export function StepBienvenida({ onNext }: Props) {
           <span className="text-prestigio-500">Financiera</span>
         </h1>
         <p className="text-gray-600 text-lg max-w-md mx-auto">
-          En pocos minutos vamos a construir juntos el diagnostico financiero de tu empresa, paso a paso.
+          En pocos minutos vamos a construir juntos el diagnóstico financiero de tu empresa, paso a paso.
         </p>
       </motion.div>
 
@@ -58,7 +58,7 @@ export function StepBienvenida({ onNext }: Props) {
             <svg className="w-7 h-7 text-prestigio-700 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M3 13h2v8H3zM9 9h2v12H9zM15 5h2v16h-2zM21 1h2v20h-2z" />
             </svg>
-          ), texto: 'Indicadores automaticos' },
+          ), texto: 'Indicadores automáticos' },
           { icon: (
             <svg className="w-7 h-7 text-prestigio-700 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M9.75 3.104v5.714a2.25 2.25 0 0 1-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 0 1 4.5 0m0 0v5.714a2.25 2.25 0 0 0 .659 1.591L19 14.5m-4.75-11.396c.251.023.501.05.75.082M5 14.5l-1.43 1.43a2.25 2.25 0 0 0 1.59 3.84h13.68a2.25 2.25 0 0 0 1.59-3.84L19 14.5" />
@@ -91,7 +91,7 @@ export function StepBienvenida({ onNext }: Props) {
       </motion.button>
 
       <p className="text-xs text-gray-400">
-        Tus datos estan seguros y solo los usamos para generar tu diagnostico.
+        Tus datos están seguros y solo los usamos para generar tu diagnóstico.
       </p>
     </div>
   )

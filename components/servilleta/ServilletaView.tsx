@@ -6,28 +6,64 @@ import { HelpCircle, X } from 'lucide-react'
 
 // ── Tooltips ────────────────────────────────────────────────────────
 const TIPS: Record<string, string> = {
-  ingresos: 'Todo el dinero que entra por venta de tus productos o servicios. Es la linea principal de tu P&G.',
+  ingresos: 'Todo el dinero que entra por la venta de tus productos o servicios. Es la línea principal de tu Estado de Resultados.',
   costos: 'Lo que te cuesta producir o comprar lo que vendes: materia prima, mano de obra directa, etc.',
-  gastos: 'Gastos de administracion, ventas, arriendo, nomina administrativa, publicidad, etc.',
-  depAmort: 'Desgaste de tus activos fijos (maquinaria, vehiculos, equipos). Si no tienes, pon 0.',
+  gastos: 'Gastos de administración, ventas, arriendo, nómina administrativa, publicidad, etc.',
+  depAmort: 'Desgaste de tus activos fijos (maquinaria, vehículos, equipos). Si no tienes, pon 0.',
   cartera: 'Dinero que te deben tus clientes (cuentas por cobrar).',
-  inventarios: 'Mercancia o materia prima que tienes en bodega.',
-  proveedores: 'Dinero que tu le debes a tus proveedores.',
-  activosFijos: 'Maquinaria, vehiculos, equipos, inmuebles de tu empresa.',
-  impuestos: 'Impuesto de renta pagado en el periodo.',
-  servicioDeuda: 'Intereses + abono a capital que pagaste por tus creditos en el periodo.',
+  inventarios: 'Mercancía o materia prima que tienes en bodega.',
+  proveedores: 'Dinero que tú le debes a tus proveedores.',
+  activosFijos: 'Maquinaria, vehículos, equipos, inmuebles de tu empresa.',
+  impuestos: 'Impuesto de renta pagado en el período.',
+  servicioDeuda: 'Intereses + abono a capital que pagaste por tus créditos en el período.',
   dividendos: 'Dinero distribuido a los socios. Si no repartiste, pon 0.',
 }
 
-// ── Formato de numeros ──────────────────────────────────────────────
+// ── Formato de números ──────────────────────────────────────────────
 function fmt(n: number): string {
+  if (!isFinite(n) || isNaN(n)) return '—'
   if (n === 0) return '0'
   return n.toLocaleString('es-CO', { maximumFractionDigits: 0 })
 }
 
 function fmtSigned(n: number): string {
+  if (!isFinite(n) || isNaN(n)) return '—'
   const prefix = n > 0 ? '+' : ''
   return `${prefix}${fmt(n)}`
+}
+
+// ── Tooltip flotante ────────────────────────────────────────────────
+function Tooltip({ text }: { text: string }) {
+  const [show, setShow] = useState(false)
+
+  return (
+    <span className="relative inline-flex">
+      <button
+        type="button"
+        onClick={() => setShow(!show)}
+        className="text-prestigio-400 hover:text-prestigio-700 transition-colors"
+        aria-label="Ayuda"
+      >
+        <HelpCircle size={15} />
+      </button>
+      {show && (
+        <>
+          {/* Overlay para cerrar al tocar fuera */}
+          <div className="fixed inset-0 z-[9998]" onClick={() => setShow(false)} />
+          <div className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-72 sm:w-80 bg-prestigio-900 text-white text-sm rounded-2xl px-5 py-4 shadow-2xl z-[9999] leading-relaxed">
+            {text}
+            <button
+              onClick={() => setShow(false)}
+              className="absolute -top-3 -right-3 w-8 h-8 bg-white text-prestigio-900 rounded-full flex items-center justify-center shadow-lg hover:bg-gray-100 transition-colors border-2 border-gray-200"
+              aria-label="Cerrar"
+            >
+              <X size={16} strokeWidth={3} />
+            </button>
+          </div>
+        </>
+      )}
+    </span>
+  )
 }
 
 // ── Mini componente de input inline ─────────────────────────────────
@@ -35,16 +71,13 @@ function CampoInline({
   value,
   onChange,
   tip,
-  placeholder = '0',
 }: {
   value: number
   onChange: (v: number) => void
   tip?: string
-  placeholder?: string
 }) {
   const [focused, setFocused] = useState(false)
-  const [display, setDisplay] = useState(value > 0 ? fmt(value) : '')
-  const [showTip, setShowTip] = useState(false)
+  const [display, setDisplay] = useState('')
 
   function handleFocus() {
     setFocused(true)
@@ -53,7 +86,7 @@ function CampoInline({
 
   function handleBlur() {
     setFocused(false)
-    setDisplay(value > 0 ? fmt(value) : '')
+    setDisplay('')
   }
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -63,49 +96,28 @@ function CampoInline({
     onChange(isNaN(num) ? 0 : num)
   }
 
-  // Sync external value changes
-  if (!focused && value > 0 && display !== fmt(value)) {
-    // will re-render with correct display
-  }
+  const shown = focused ? display : (value > 0 ? fmt(value) : '')
 
   return (
-    <span className="inline-flex items-center gap-1 relative">
+    <span className="inline-flex items-center gap-1.5">
       <span className="text-gray-400 text-sm">$</span>
       <input
         type="text"
         inputMode="decimal"
-        value={focused ? display : (value > 0 ? fmt(value) : '')}
+        value={shown}
         onChange={handleChange}
         onFocus={handleFocus}
         onBlur={handleBlur}
-        placeholder={placeholder}
+        placeholder="0"
         className="w-24 sm:w-28 text-right text-sm font-semibold border-b-2 border-amber-400 bg-amber-50/60 px-1.5 py-1 focus:border-amber-600 focus:bg-amber-50 outline-none transition-colors rounded-t-sm"
       />
       <span className="text-gray-400 text-xs">M</span>
-      {tip && (
-        <>
-          <button
-            type="button"
-            onClick={() => setShowTip(!showTip)}
-            className="text-prestigio-400 hover:text-prestigio-600 transition-colors flex-shrink-0"
-          >
-            <HelpCircle size={14} />
-          </button>
-          {showTip && (
-            <div className="absolute bottom-full right-0 mb-1 w-56 bg-prestigio-900 text-white text-xs rounded-lg px-3 py-2 shadow-lg z-50">
-              {tip}
-              <button onClick={() => setShowTip(false)} className="absolute top-1 right-1 text-white/60 hover:text-white">
-                <X size={10} />
-              </button>
-            </div>
-          )}
-        </>
-      )}
+      {tip && <Tooltip text={tip} />}
     </span>
   )
 }
 
-// ── Mini input para la tabla de dos anos ─────────────────────────────
+// ── Mini input para la tabla de dos años ─────────────────────────────
 function CampoTabla({
   value,
   onChange,
@@ -114,7 +126,7 @@ function CampoTabla({
   onChange: (v: number) => void
 }) {
   const [focused, setFocused] = useState(false)
-  const [display, setDisplay] = useState(value > 0 ? fmt(value) : '')
+  const [display, setDisplay] = useState('')
 
   function handleFocus() {
     setFocused(true)
@@ -123,7 +135,7 @@ function CampoTabla({
 
   function handleBlur() {
     setFocused(false)
-    setDisplay(value > 0 ? fmt(value) : '')
+    setDisplay('')
   }
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -133,16 +145,18 @@ function CampoTabla({
     onChange(isNaN(num) ? 0 : num)
   }
 
+  const shown = focused ? display : (value > 0 ? fmt(value) : '')
+
   return (
     <input
       type="text"
       inputMode="decimal"
-      value={focused ? display : (value > 0 ? fmt(value) : '')}
+      value={shown}
       onChange={handleChange}
       onFocus={handleFocus}
       onBlur={handleBlur}
       placeholder="0"
-      className="w-20 sm:w-24 text-right text-sm font-medium border-b-2 border-amber-400 bg-amber-50/60 px-1 py-0.5 focus:border-amber-600 focus:bg-amber-50 outline-none transition-colors rounded-t-sm"
+      className="w-full text-right text-sm font-medium border-b-2 border-amber-400 bg-amber-50/60 px-1 py-0.5 focus:border-amber-600 focus:bg-amber-50 outline-none transition-colors rounded-t-sm"
     />
   )
 }
@@ -175,18 +189,13 @@ function FilaCalculada({
   )
 }
 
-// ── Fila de referencia (valor traido de seccion anterior) ───────────
-function FilaReferencia({
-  label,
-  valor,
-}: {
-  label: string
-  valor: number
-}) {
+// ── Fila de referencia (valor traído de sección anterior) ───────────
+function FilaReferencia({ label, valor }: { label: string; valor: number }) {
+  const safe = isFinite(valor) && !isNaN(valor)
   return (
     <div className="flex items-center justify-between py-1.5 px-3">
       <span className="text-sm text-gray-600">{label}</span>
-      <span className={`text-sm font-medium ${valor >= 0 ? 'text-gray-700' : 'text-red-600'}`}>
+      <span className={`text-sm font-medium ${!safe ? 'text-gray-400' : valor >= 0 ? 'text-gray-700' : 'text-red-600'}`}>
         $ {fmtSigned(valor)} M
       </span>
     </div>
@@ -203,30 +212,37 @@ export function ServilletaView({ onNext, onPrev }: Props) {
   const store = useWizardStore()
   const { anioAnterior, anioActual, datosAnioActual: act, datosAnioAnterior: ant } = store
 
-  // Calculados P&G
-  const utilidadOperativa = act.ingresosOperacionales - act.costosTotales - act.gastosTotales
-  const ebitda = utilidadOperativa + act.depreciacionesAmortizaciones
+  // Calculados P&G (con fallbacks a 0)
+  const ingresos = act.ingresosOperacionales || 0
+  const costos = act.costosTotales || 0
+  const gastos = act.gastosTotales || 0
+  const depAmort = act.depreciacionesAmortizaciones || 0
+  const utilidadOperativa = ingresos - costos - gastos
+  const ebitda = utilidadOperativa + depAmort
 
   // Calculados Cambios
-  const deltaCartera = ant.carteraNeta - act.carteraNeta
-  const deltaInventarios = ant.inventarios - act.inventarios
-  const deltaProveedores = act.proveedores - ant.proveedores
+  const deltaCartera = (ant.carteraNeta || 0) - (act.carteraNeta || 0)
+  const deltaInventarios = (ant.inventarios || 0) - (act.inventarios || 0)
+  const deltaProveedores = (act.proveedores || 0) - (ant.proveedores || 0)
   const cambioKTNO = deltaCartera + deltaInventarios + deltaProveedores
 
-  const deltaAF = ant.activosFijosNetos - act.activosFijosNetos
+  const deltaAF = (ant.activosFijosNetos || 0) - (act.activosFijosNetos || 0)
 
   // FCL
-  const fcl = ebitda + cambioKTNO + deltaAF - act.impuestos
+  const impuestos = act.impuestos || 0
+  const fcl = ebitda + cambioKTNO + deltaAF - impuestos
 
   // Caja final
-  const cajaFinal = fcl - act.servicioDeuda - act.dividendos
+  const servDeuda = act.servicioDeuda || 0
+  const dividendos = act.dividendos || 0
+  const cajaFinal = fcl - servDeuda - dividendos
 
-  // Margen EBITDA para el indicador
-  const margenEbitda = act.ingresosOperacionales > 0 ? (ebitda / act.ingresosOperacionales) * 100 : 0
+  // Margen EBITDA
+  const margenEbitda = ingresos > 0 ? (ebitda / ingresos) * 100 : 0
 
   return (
     <div className="space-y-4">
-      {/* Titulo */}
+      {/* Título */}
       <div className="text-center space-y-1">
         <h2 className="text-xl font-bold text-prestigio-900">Tu Servilleta Financiera</h2>
         <p className="text-sm text-gray-500">
@@ -235,7 +251,7 @@ export function ServilletaView({ onNext, onPrev }: Props) {
         </p>
       </div>
 
-      {/* ═══ SECCION 1: Estado de Resultados ═══ */}
+      {/* ═══ SECCIÓN 1: Estado de Resultados ═══ */}
       <div className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm">
         <div className="bg-prestigio-900 px-4 py-2">
           <h3 className="text-white font-semibold text-sm tracking-wide">
@@ -244,7 +260,6 @@ export function ServilletaView({ onNext, onPrev }: Props) {
         </div>
 
         <div className="divide-y divide-gray-100">
-          {/* Ingresos */}
           <div className="flex items-center justify-between py-2.5 px-3">
             <span className="text-sm text-gray-700">Ingresos Operacionales</span>
             <CampoInline
@@ -254,7 +269,6 @@ export function ServilletaView({ onNext, onPrev }: Props) {
             />
           </div>
 
-          {/* Costos */}
           <div className="flex items-center justify-between py-2.5 px-3">
             <span className="text-sm text-gray-700">(-) Costos Totales</span>
             <CampoInline
@@ -264,7 +278,6 @@ export function ServilletaView({ onNext, onPrev }: Props) {
             />
           </div>
 
-          {/* Gastos */}
           <div className="flex items-center justify-between py-2.5 px-3">
             <span className="text-sm text-gray-700">(-) Gastos Totales</span>
             <CampoInline
@@ -274,10 +287,8 @@ export function ServilletaView({ onNext, onPrev }: Props) {
             />
           </div>
 
-          {/* Utilidad Operativa (calculada) */}
           <FilaCalculada label="= Utilidad Operativa" valor={utilidadOperativa} />
 
-          {/* Dep & Amort */}
           <div className="flex items-center justify-between py-2.5 px-3">
             <span className="text-sm text-gray-700">(+) Depreciaciones y Amort.</span>
             <CampoInline
@@ -287,22 +298,24 @@ export function ServilletaView({ onNext, onPrev }: Props) {
             />
           </div>
 
-          {/* EBITDA (calculado, destacado) */}
           <FilaCalculada label="= EBITDA" valor={ebitda} highlight />
 
-          {/* Margen EBITDA indicador */}
+          {/* Margen EBITDA */}
           <div className="px-3 py-2 bg-gray-50">
             <p className="text-xs text-gray-500">
-              Margen EBITDA: <span className={`font-bold ${margenEbitda >= 15 ? 'text-green-600' : margenEbitda >= 5 ? 'text-yellow-600' : 'text-red-600'}`}>
+              Margen EBITDA:{' '}
+              <span className={`font-bold ${margenEbitda >= 15 ? 'text-green-600' : margenEbitda >= 5 ? 'text-yellow-600' : 'text-red-600'}`}>
                 {margenEbitda.toFixed(1)}%
               </span>
-              <span className="text-gray-400"> — De cada $100 que vendes, ${margenEbitda.toFixed(0)} quedan como EBITDA</span>
+              {ingresos > 0 && (
+                <span className="text-gray-400"> — De cada $100 que vendes, ${margenEbitda.toFixed(0)} quedan como EBITDA</span>
+              )}
             </p>
           </div>
         </div>
       </div>
 
-      {/* ═══ SECCION 2: Cambios en Capital de Trabajo ═══ */}
+      {/* ═══ SECCIÓN 2: Cambios en Capital de Trabajo ═══ */}
       <div className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm">
         <div className="bg-prestigio-900 px-4 py-2">
           <h3 className="text-white font-semibold text-sm tracking-wide">
@@ -311,103 +324,69 @@ export function ServilletaView({ onNext, onPrev }: Props) {
         </div>
 
         {/* Header de tabla */}
-        <div className="grid grid-cols-[1fr,auto,auto,auto] gap-1 px-3 py-1.5 bg-gray-50 border-b border-gray-200 items-center">
+        <div className="grid grid-cols-[1fr_5rem_5rem_4rem] sm:grid-cols-[1fr_6rem_6rem_5rem] gap-2 px-3 py-1.5 bg-gray-50 border-b border-gray-200 items-center">
           <span className="text-xs font-medium text-gray-500"></span>
-          <span className="text-xs font-medium text-gray-500 text-center w-20 sm:w-24">{anioAnterior}</span>
-          <span className="text-xs font-medium text-gray-500 text-center w-20 sm:w-24">{anioActual}</span>
-          <span className="text-xs font-medium text-gray-500 text-right w-16 sm:w-20">Cambio</span>
+          <span className="text-xs font-medium text-gray-500 text-center">{anioAnterior}</span>
+          <span className="text-xs font-medium text-gray-500 text-center">{anioActual}</span>
+          <span className="text-xs font-medium text-gray-500 text-right">Cambio</span>
         </div>
 
         <div className="divide-y divide-gray-100">
           {/* Cartera */}
-          <div className="grid grid-cols-[1fr,auto,auto,auto] gap-1 px-3 py-2 items-center">
+          <div className="grid grid-cols-[1fr_5rem_5rem_4rem] sm:grid-cols-[1fr_6rem_6rem_5rem] gap-2 px-3 py-2 items-center">
             <span className="text-sm text-gray-700 flex items-center gap-1">
-              Cartera
-              <Tip text={TIPS.cartera} />
+              Cartera <Tooltip text={TIPS.cartera} />
             </span>
-            <CampoTabla
-              value={ant.carteraNeta}
-              onChange={(v) => store.updateDatosAnterior('carteraNeta', v)}
-            />
-            <CampoTabla
-              value={act.carteraNeta}
-              onChange={(v) => store.updateDatosActual('carteraNeta', v)}
-            />
-            <span className={`text-sm font-medium text-right w-16 sm:w-20 ${deltaCartera >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+            <CampoTabla value={ant.carteraNeta} onChange={(v) => store.updateDatosAnterior('carteraNeta', v)} />
+            <CampoTabla value={act.carteraNeta} onChange={(v) => store.updateDatosActual('carteraNeta', v)} />
+            <span className={`text-sm font-medium text-right ${deltaCartera >= 0 ? 'text-green-600' : 'text-red-600'}`}>
               {fmtSigned(deltaCartera)}
             </span>
           </div>
 
           {/* Inventarios */}
-          <div className="grid grid-cols-[1fr,auto,auto,auto] gap-1 px-3 py-2 items-center">
+          <div className="grid grid-cols-[1fr_5rem_5rem_4rem] sm:grid-cols-[1fr_6rem_6rem_5rem] gap-2 px-3 py-2 items-center">
             <span className="text-sm text-gray-700 flex items-center gap-1">
-              Inventarios
-              <Tip text={TIPS.inventarios} />
+              Inventarios <Tooltip text={TIPS.inventarios} />
             </span>
-            <CampoTabla
-              value={ant.inventarios}
-              onChange={(v) => store.updateDatosAnterior('inventarios', v)}
-            />
-            <CampoTabla
-              value={act.inventarios}
-              onChange={(v) => store.updateDatosActual('inventarios', v)}
-            />
-            <span className={`text-sm font-medium text-right w-16 sm:w-20 ${deltaInventarios >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+            <CampoTabla value={ant.inventarios} onChange={(v) => store.updateDatosAnterior('inventarios', v)} />
+            <CampoTabla value={act.inventarios} onChange={(v) => store.updateDatosActual('inventarios', v)} />
+            <span className={`text-sm font-medium text-right ${deltaInventarios >= 0 ? 'text-green-600' : 'text-red-600'}`}>
               {fmtSigned(deltaInventarios)}
             </span>
           </div>
 
           {/* Proveedores */}
-          <div className="grid grid-cols-[1fr,auto,auto,auto] gap-1 px-3 py-2 items-center">
+          <div className="grid grid-cols-[1fr_5rem_5rem_4rem] sm:grid-cols-[1fr_6rem_6rem_5rem] gap-2 px-3 py-2 items-center">
             <span className="text-sm text-gray-700 flex items-center gap-1">
-              Proveedores
-              <Tip text={TIPS.proveedores} />
+              Proveedores <Tooltip text={TIPS.proveedores} />
             </span>
-            <CampoTabla
-              value={ant.proveedores}
-              onChange={(v) => store.updateDatosAnterior('proveedores', v)}
-            />
-            <CampoTabla
-              value={act.proveedores}
-              onChange={(v) => store.updateDatosActual('proveedores', v)}
-            />
-            <span className={`text-sm font-medium text-right w-16 sm:w-20 ${deltaProveedores >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+            <CampoTabla value={ant.proveedores} onChange={(v) => store.updateDatosAnterior('proveedores', v)} />
+            <CampoTabla value={act.proveedores} onChange={(v) => store.updateDatosActual('proveedores', v)} />
+            <span className={`text-sm font-medium text-right ${deltaProveedores >= 0 ? 'text-green-600' : 'text-red-600'}`}>
               {fmtSigned(deltaProveedores)}
             </span>
           </div>
 
-          {/* Cambio KTNO */}
-          <div className="grid grid-cols-[1fr,auto] gap-1 items-center">
-            <FilaCalculada label="= Cambio Capital de Trabajo" valor={cambioKTNO} />
-          </div>
+          <FilaCalculada label="= Cambio Capital de Trabajo" valor={cambioKTNO} />
 
           {/* Activos Fijos */}
-          <div className="grid grid-cols-[1fr,auto,auto,auto] gap-1 px-3 py-2 items-center">
+          <div className="grid grid-cols-[1fr_5rem_5rem_4rem] sm:grid-cols-[1fr_6rem_6rem_5rem] gap-2 px-3 py-2 items-center">
             <span className="text-sm text-gray-700 flex items-center gap-1">
-              Activos Fijos
-              <Tip text={TIPS.activosFijos} />
+              Activos Fijos <Tooltip text={TIPS.activosFijos} />
             </span>
-            <CampoTabla
-              value={ant.activosFijosNetos}
-              onChange={(v) => store.updateDatosAnterior('activosFijosNetos', v)}
-            />
-            <CampoTabla
-              value={act.activosFijosNetos}
-              onChange={(v) => store.updateDatosActual('activosFijosNetos', v)}
-            />
-            <span className={`text-sm font-medium text-right w-16 sm:w-20 ${deltaAF >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+            <CampoTabla value={ant.activosFijosNetos} onChange={(v) => store.updateDatosAnterior('activosFijosNetos', v)} />
+            <CampoTabla value={act.activosFijosNetos} onChange={(v) => store.updateDatosActual('activosFijosNetos', v)} />
+            <span className={`text-sm font-medium text-right ${deltaAF >= 0 ? 'text-green-600' : 'text-red-600'}`}>
               {fmtSigned(deltaAF)}
             </span>
           </div>
 
-          {/* Cambio CAPEX */}
-          <div className="grid grid-cols-[1fr,auto] gap-1 items-center">
-            <FilaCalculada label="= Cambio CAPEX" valor={deltaAF} />
-          </div>
+          <FilaCalculada label="= Cambio CAPEX" valor={deltaAF} />
         </div>
       </div>
 
-      {/* ═══ SECCION 3: Flujo de Caja Libre ═══ */}
+      {/* ═══ SECCIÓN 3: Flujo de Caja Libre ═══ */}
       <div className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm">
         <div className="bg-prestigio-900 px-4 py-2">
           <h3 className="text-white font-semibold text-sm tracking-wide">
@@ -420,7 +399,6 @@ export function ServilletaView({ onNext, onPrev }: Props) {
           <FilaReferencia label="(+/-) Cambio Capital de Trabajo" valor={cambioKTNO} />
           <FilaReferencia label="(+/-) Cambio CAPEX" valor={deltaAF} />
 
-          {/* Impuestos */}
           <div className="flex items-center justify-between py-2.5 px-3">
             <span className="text-sm text-gray-700">(-) Impuestos</span>
             <CampoInline
@@ -430,12 +408,11 @@ export function ServilletaView({ onNext, onPrev }: Props) {
             />
           </div>
 
-          {/* FCL */}
           <FilaCalculada label="= Flujo de Caja Libre" valor={fcl} highlight />
         </div>
       </div>
 
-      {/* ═══ SECCION 4: Caja Final ═══ */}
+      {/* ═══ SECCIÓN 4: Caja Final ═══ */}
       <div className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm">
         <div className="bg-prestigio-900 px-4 py-2">
           <h3 className="text-white font-semibold text-sm tracking-wide">
@@ -446,7 +423,6 @@ export function ServilletaView({ onNext, onPrev }: Props) {
         <div className="divide-y divide-gray-100">
           <FilaReferencia label="Flujo de Caja Libre" valor={fcl} />
 
-          {/* Servicio de la Deuda */}
           <div className="flex items-center justify-between py-2.5 px-3">
             <span className="text-sm text-gray-700">(-) Servicio de la Deuda</span>
             <CampoInline
@@ -456,7 +432,6 @@ export function ServilletaView({ onNext, onPrev }: Props) {
             />
           </div>
 
-          {/* Dividendos */}
           <div className="flex items-center justify-between py-2.5 px-3">
             <span className="text-sm text-gray-700">(-) Dividendos</span>
             <CampoInline
@@ -478,12 +453,12 @@ export function ServilletaView({ onNext, onPrev }: Props) {
             </span>
           </div>
 
-          {/* Interpretacion */}
+          {/* Interpretación */}
           <div className="px-3 py-2 bg-gray-50">
             <p className="text-xs text-gray-500">
               {cajaFinal >= 0
-                ? `Tu empresa genera $${fmt(cajaFinal)}M de caja despues de pagar operacion, deuda y dividendos.`
-                : `Tu empresa tiene un deficit de caja de $${fmt(Math.abs(cajaFinal))}M. Necesitas financiacion adicional o reducir gastos.`
+                ? `Tu empresa genera $${fmt(cajaFinal)}M de caja después de pagar operación, deuda y dividendos.`
+                : `Tu empresa tiene un déficit de caja de $${fmt(Math.abs(cajaFinal))}M. Necesitas financiación adicional o reducir gastos.`
               }
             </p>
           </div>
@@ -502,34 +477,9 @@ export function ServilletaView({ onNext, onPrev }: Props) {
           onClick={onNext}
           className="flex-[2] bg-prestigio-900 hover:bg-prestigio-700 text-white font-semibold py-3 rounded-xl transition-all shadow-md shadow-prestigio-200"
         >
-          Ver mi Diagnostico →
+          Ver mi Diagnóstico →
         </button>
       </div>
     </div>
-  )
-}
-
-// ── Tooltip compacto ────────────────────────────────────────────────
-function Tip({ text }: { text: string }) {
-  const [show, setShow] = useState(false)
-
-  return (
-    <span className="relative">
-      <button
-        type="button"
-        onClick={() => setShow(!show)}
-        className="text-prestigio-400 hover:text-prestigio-600 transition-colors"
-      >
-        <HelpCircle size={13} />
-      </button>
-      {show && (
-        <div className="absolute bottom-full left-0 mb-1 w-48 bg-prestigio-900 text-white text-xs rounded-lg px-2.5 py-1.5 shadow-lg z-50">
-          {text}
-          <button onClick={() => setShow(false)} className="absolute top-0.5 right-1 text-white/60 hover:text-white">
-            <X size={10} />
-          </button>
-        </div>
-      )}
-    </span>
   )
 }

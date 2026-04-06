@@ -5,16 +5,16 @@ import { persist } from 'zustand/middleware'
 import type { DatosAnio } from '@/types/servilleta'
 
 // Datos pre-llenados realistas: empresa ficticia "Delicias del Valle"
-// Cadena de restaurantes mediana en Colombia, sector Gastronomia
+// Cadena de restaurantes mediana en Colombia, sector Gastronomía
 const DATOS_ANTERIORES_PREFILL: DatosAnio = {
   // Estado de Resultados 2024 (en millones COP)
   ingresosOperacionales: 4850,
-  costosTotales: 2665,             // Ingresos - Utilidad Bruta = 4850 - 2185
-  gastosTotales: 1505,             // Utilidad Bruta - Utilidad Op = 2185 - 680
-  depreciacionesAmortizaciones: 145, // EBITDA - Utilidad Op = 825 - 680
-  utilidadBruta: 2185,             // calculado: 4850 - 2665
-  ebitda: 825,                     // calculado: 680 + 145
-  utilidadOperacional: 680,        // calculado: 4850 - 2665 - 1505
+  costosTotales: 2665,
+  gastosTotales: 1505,
+  depreciacionesAmortizaciones: 145,
+  utilidadBruta: 2185,
+  ebitda: 825,
+  utilidadOperacional: 680,
   intereses: 145,
   impuestos: 178,
   otrosIngresosEgresos: 32,
@@ -31,19 +31,19 @@ const DATOS_ANTERIORES_PREFILL: DatosAnio = {
   capitalSuperavit: 650,
   totalPatrimonio: 1000,
   // Servilleta
-  servicioDeuda: 535,              // intereses 145 + amortizacion (780/2=390)
+  servicioDeuda: 535,
   dividendos: 0,
 }
 
 const DATOS_ACTUALES_PREFILL: DatosAnio = {
   // Estado de Resultados 2025 (en millones COP)
   ingresosOperacionales: 5620,
-  costosTotales: 2980,             // 5620 - 2640
-  gastosTotales: 1795,             // 2640 - 845
-  depreciacionesAmortizaciones: 170, // 1015 - 845
-  utilidadBruta: 2640,             // calculado: 5620 - 2980
-  ebitda: 1015,                    // calculado: 845 + 170
-  utilidadOperacional: 845,        // calculado: 5620 - 2980 - 1795
+  costosTotales: 2980,
+  gastosTotales: 1795,
+  depreciacionesAmortizaciones: 170,
+  utilidadBruta: 2640,
+  ebitda: 1015,
+  utilidadOperacional: 845,
   intereses: 132,
   impuestos: 225,
   otrosIngresosEgresos: 18,
@@ -60,12 +60,11 @@ const DATOS_ACTUALES_PREFILL: DatosAnio = {
   capitalSuperavit: 750,
   totalPatrimonio: 1465,
   // Servilleta
-  servicioDeuda: 487,              // intereses 132 + amortizacion (710/2=355)
+  servicioDeuda: 487,
   dividendos: 50,
 }
 
 export interface WizardState {
-  // Datos basicos
   nombre: string
   cedula: string
   empresa: string
@@ -73,17 +72,12 @@ export interface WizardState {
   sector: string
   anioAnterior: number
   anioActual: number
-
-  // Datos por ano
   datosAnioAnterior: DatosAnio
   datosAnioActual: DatosAnio
-
-  // Control del wizard
   pasoActual: number
   totalPasos: number
   sessionId: string | null
 
-  // Acciones
   setNombre: (v: string) => void
   setCedula: (v: string) => void
   setEmpresa: (v: string) => void
@@ -100,24 +94,24 @@ export interface WizardState {
 
 // Recalcula los campos derivados del P&G a partir de los inputs
 function recalcularDerivados(datos: DatosAnio): DatosAnio {
-  const utilidadBruta = datos.ingresosOperacionales - datos.costosTotales
-  const utilidadOperacional = utilidadBruta - datos.gastosTotales
-  const ebitda = utilidadOperacional + datos.depreciacionesAmortizaciones
+  const utilidadBruta = (datos.ingresosOperacionales || 0) - (datos.costosTotales || 0)
+  const utilidadOperacional = utilidadBruta - (datos.gastosTotales || 0)
+  const ebitda = utilidadOperacional + (datos.depreciacionesAmortizaciones || 0)
   return { ...datos, utilidadBruta, utilidadOperacional, ebitda }
 }
 
 const ESTADO_INICIAL = {
-  nombre: 'Carolina Mejia Restrepo',
+  nombre: 'Carolina Mejía Restrepo',
   cedula: '1017234567',
   empresa: 'Delicias del Valle S.A.S.',
   email: 'carolina.mejia@deliciasdelvalle.co',
-  sector: 'Gastronomia',
+  sector: 'Gastronomía',
   anioAnterior: 2024,
   anioActual: 2025,
   datosAnioAnterior: { ...DATOS_ANTERIORES_PREFILL },
   datosAnioActual: { ...DATOS_ACTUALES_PREFILL },
   pasoActual: 0,
-  totalPasos: 4,
+  totalPasos: 3,
   sessionId: null,
 }
 
@@ -155,6 +149,16 @@ export const useWizardStore = create<WizardState>()(
     }),
     {
       name: 'servilleta-wizard',
+      version: 2,
+      migrate: () => {
+        // Versión anterior no tenía costosTotales, gastosTotales, etc.
+        // Resetear a valores por defecto
+        return {
+          ...ESTADO_INICIAL,
+          datosAnioAnterior: { ...DATOS_ANTERIORES_PREFILL },
+          datosAnioActual: { ...DATOS_ACTUALES_PREFILL },
+        }
+      },
     }
   )
 )

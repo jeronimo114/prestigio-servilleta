@@ -7,35 +7,35 @@ import type { Message } from '@/lib/ai-client'
 
 // FAQs contextuales por paso del wizard
 const FAQS_POR_PASO: Record<string, string[]> = {
-  'Datos basicos': [
+  'Datos básicos': [
     '¿Mis datos son confidenciales?',
-    '¿Que sector elijo si tengo varios?',
+    '¿Qué sector elijo si tengo varios?',
   ],
   'Servilleta': [
-    '¿Que son los Ingresos Operacionales?',
-    '¿Que son Costos vs Gastos?',
-    '¿Que es el EBITDA y por que importa?',
-    '¿Que es el Capital de Trabajo (KTNO)?',
-    '¿Que son Depreciaciones y Amortizaciones?',
-    '¿Como calculo el Servicio de la Deuda?',
-    '¿Que es el Flujo de Caja Libre?',
+    '¿Qué son los Ingresos Operacionales?',
+    '¿Qué son Costos vs Gastos?',
+    '¿Qué es el EBITDA y por qué importa?',
+    '¿Qué es el Capital de Trabajo (KTNO)?',
+    '¿Qué son Depreciaciones y Amortizaciones?',
+    '¿Cómo calculo el Servicio de la Deuda?',
+    '¿Qué es el Flujo de Caja Libre?',
   ],
-  'Confirmacion': [
-    '¿Puedo cambiar un dato despues?',
-    '¿Que indicadores me van a calcular?',
-    '¿Que es la Palanca de Crecimiento?',
+  'Confirmación': [
+    '¿Puedo cambiar un dato después?',
+    '¿Qué indicadores me van a calcular?',
+    '¿Qué es la Palanca de Crecimiento?',
   ],
   'resultados': [
-    '¿Que significa el semaforo rojo?',
-    '¿Como mejoro mi margen EBITDA?',
-    '¿Que es la Palanca de Crecimiento?',
-    '¿Como interpreto el Flujo de Caja Libre?',
+    '¿Qué significa el semáforo rojo?',
+    '¿Cómo mejoro mi margen EBITDA?',
+    '¿Qué es la Palanca de Crecimiento?',
+    '¿Cómo interpreto el Flujo de Caja Libre?',
   ],
   'default': [
-    '¿Que es el EBITDA?',
-    '¿Para que sirve la servilleta financiera?',
-    '¿Que es el KTNO?',
-    '¿Como interpreto los semaforos?',
+    '¿Qué es el EBITDA?',
+    '¿Para qué sirve la servilleta financiera?',
+    '¿Qué es el KTNO?',
+    '¿Cómo interpreto los semáforos?',
   ],
 }
 
