@@ -14,7 +14,7 @@ export function calcularDerivedosAnio(datos: DatosAnio): {
   // Derivados del P&G usando nuevos campos
   const utilidadOperacional = (datos.ingresosOperacionales || 0) - (datos.costosTotales || 0) - (datos.gastosTotales || 0)
   const ebitda = utilidadOperacional + (datos.depreciacionesAmortizaciones || 0)
-  const intereses = datos.intereses || (datos.servicioDeuda > 0 ? datos.servicioDeuda * 0.3 : 0)
+  const intereses = datos.intereses || 0
   const utilidadNeta = utilidadOperacional - (intereses || 0) - (datos.impuestos || 0) + (datos.otrosIngresosEgresos || 0)
 
   const totalActivos =
@@ -52,13 +52,14 @@ export function calcularIndicadores(
   const cicloFinancieroDias = rotacionCarteraDias + rotacionInventariosDias - rotacionProveedoresDias
 
   const intereses = datos.intereses || 0
+  const amortizacionDeuda = datos.amortizacionDeuda || 0
   const ebitdaIntereses = safe(ebitda, intereses)
   const pasivoFinancieroEbitda = safe(totalObligacionesFinancieras, ebitda)
 
   // Flujo de Caja Libre (requiere datos del ano anterior)
   let flujoCajaLibre = 0
-  let servicioDeudaIntereses = intereses
-  let servicioDeudaAmortizacion = safe(datos.obligacionesFinancierasLP, ANIOS_DEUDA_LP)
+  const servicioDeudaIntereses = intereses
+  const servicioDeudaAmortizacion = amortizacionDeuda
   let cambioEnDeuda = 0
   let cajaPeriodo = 0
   let fclSD = 0
@@ -71,14 +72,12 @@ export function calcularIndicadores(
     const deltaProveedores = datos.proveedores - datosAnterior.proveedores
     flujoCajaLibre = ebitda + deltaCartera + deltaInventarios + deltaAF + deltaProveedores - datos.impuestos
 
-    servicioDeudaIntereses = intereses
-    servicioDeudaAmortizacion = safe(datos.obligacionesFinancierasLP, ANIOS_DEUDA_LP)
     const obligActual = datos.obligacionesFinancierasCP + datos.obligacionesFinancierasLP
     const obligAnterior = datosAnterior.obligacionesFinancierasCP + datosAnterior.obligacionesFinancierasLP
     cambioEnDeuda = obligActual - obligAnterior
 
-    cajaPeriodo = flujoCajaLibre - servicioDeudaIntereses - servicioDeudaAmortizacion + cambioEnDeuda
     const totalServicioDeuda = servicioDeudaIntereses + servicioDeudaAmortizacion
+    cajaPeriodo = flujoCajaLibre - totalServicioDeuda - (datos.dividendos || 0)
     fclSD = totalServicioDeuda > 0 ? flujoCajaLibre / totalServicioDeuda : 0
   }
 
@@ -151,6 +150,19 @@ export function semaforo(indicador: string, valor: number): SemaforoColor {
       if (valor >= 3) return 'verde'
       if (valor >= 1.5) return 'amarillo'
       return 'rojo'
+    case 'rotacionCarteraDias':
+      if (valor <= 30) return 'verde'
+      if (valor <= 60) return 'amarillo'
+      return 'rojo'
+    case 'rotacionInventariosDias':
+      if (valor <= 45) return 'verde'
+      if (valor <= 90) return 'amarillo'
+      return 'rojo'
+    case 'rotacionProveedoresDias':
+      // Más días = mejor (más plazo para pagar)
+      if (valor >= 30) return 'verde'
+      if (valor >= 15) return 'amarillo'
+      return 'rojo'
     case 'cicloFinancieroDias':
       if (valor <= 60) return 'verde'
       if (valor <= 120) return 'amarillo'
@@ -206,6 +218,27 @@ export function indicadoresConSemaforo(ind: IndicadoresAnio): IndicadorConSemafo
       semaforo: semaforo('pasivoFinancieroEbitda', ind.pasivoFinancieroEbitda),
       descripcion: 'Años necesarios para pagar deuda financiera con EBITDA',
       formato: 'veces',
+    },
+    {
+      nombre: 'Rotación de Cartera',
+      valor: ind.rotacionCarteraDias,
+      semaforo: semaforo('rotacionCarteraDias', ind.rotacionCarteraDias),
+      descripcion: 'Días promedio que tardas en cobrar a tus clientes',
+      formato: 'dias',
+    },
+    {
+      nombre: 'Rotación de Inventarios',
+      valor: ind.rotacionInventariosDias,
+      semaforo: semaforo('rotacionInventariosDias', ind.rotacionInventariosDias),
+      descripcion: 'Días promedio que tu inventario permanece almacenado',
+      formato: 'dias',
+    },
+    {
+      nombre: 'Rotación de Proveedores',
+      valor: ind.rotacionProveedoresDias,
+      semaforo: semaforo('rotacionProveedoresDias', ind.rotacionProveedoresDias),
+      descripcion: 'Días promedio que tardas en pagar a proveedores',
+      formato: 'dias',
     },
     {
       nombre: 'Ciclo Financiero',

@@ -16,7 +16,8 @@ const TIPS: Record<string, string> = {
   proveedores: 'Dinero que tú le debes a tus proveedores.',
   activosFijos: 'Maquinaria, vehículos, equipos, inmuebles de tu empresa.',
   impuestos: 'Impuesto de renta pagado en el período.',
-  servicioDeuda: 'Intereses + abono a capital que pagaste por tus créditos en el período.',
+  intereses: 'Lo que le pagas al banco por el uso del dinero prestado (intereses de tus créditos).',
+  amortizacionDeuda: 'El abono a capital que reduces de tu deuda (sin contar intereses).',
   dividendos: 'Dinero distribuido a los socios. Si no repartiste, pon 0.',
 }
 
@@ -336,7 +337,9 @@ export function ServilletaView({ onNext, onPrev }: Props) {
   const fcl = ebitda + cambioKTNO + deltaAF - impuestos
 
   // Caja final
-  const servDeuda = act.servicioDeuda || 0
+  const interesesDeuda = act.intereses || 0
+  const amortDeuda = act.amortizacionDeuda || 0
+  const servDeuda = interesesDeuda + amortDeuda
   const dividendos = act.dividendos || 0
   const cajaFinal = fcl - servDeuda - dividendos
 
@@ -347,7 +350,7 @@ export function ServilletaView({ onNext, onPrev }: Props) {
   const seccion1Completa = ingresos > 0 && costos > 0
   const seccion2Completa = (act.carteraNeta > 0 || act.inventarios > 0) && act.proveedores > 0
   const seccion3Completa = seccion1Completa && seccion2Completa
-  const seccion4Completa = seccion3Completa && servDeuda > 0
+  const seccion4Completa = seccion3Completa && (interesesDeuda > 0 || amortDeuda > 0)
 
   return (
     <div className="space-y-4">
@@ -518,7 +521,7 @@ export function ServilletaView({ onNext, onPrev }: Props) {
           <FilaReferencia label="(+/-) Cambio CAPEX" valor={deltaAF} />
 
           <div className="flex items-center justify-between py-2.5 px-3">
-            <span className="text-sm text-gray-700">(-) Impuestos</span>
+            <span className="text-sm text-gray-700">(-) Impuestos {anioActual}</span>
             <CampoInline
               value={act.impuestos}
               onChange={(v) => store.updateDatosActual('impuestos', v)}
@@ -544,11 +547,20 @@ export function ServilletaView({ onNext, onPrev }: Props) {
           <FilaReferencia label="Flujo de Caja Libre" valor={fcl} />
 
           <div className="flex items-center justify-between py-2.5 px-3">
-            <span className="text-sm text-gray-700">(-) Servicio de la Deuda</span>
+            <span className="text-sm text-gray-700">(-) Intereses Financieros</span>
             <CampoInline
-              value={act.servicioDeuda}
-              onChange={(v) => store.updateDatosActual('servicioDeuda', v)}
-              tip={TIPS.servicioDeuda}
+              value={act.intereses}
+              onChange={(v) => store.updateDatosActual('intereses', v)}
+              tip={TIPS.intereses}
+            />
+          </div>
+
+          <div className="flex items-center justify-between py-2.5 px-3">
+            <span className="text-sm text-gray-700">(-) Amortización a Capital</span>
+            <CampoInline
+              value={act.amortizacionDeuda}
+              onChange={(v) => store.updateDatosActual('amortizacionDeuda', v)}
+              tip={TIPS.amortizacionDeuda}
             />
           </div>
 

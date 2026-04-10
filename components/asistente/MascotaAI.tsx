@@ -264,28 +264,32 @@ export function MascotaAI({ paso, campo }: Props) {
       </AnimatePresence>
 
       {/* Mascot button */}
-      <motion.button
-        onClick={() => setAbierto(!abierto)}
-        whileHover={{ scale: 1.1 }}
-        whileTap={{ scale: 0.95 }}
-        animate={!abierto ? { y: [0, -4, 0] } : {}}
-        transition={!abierto ? { repeat: Infinity, duration: 2.5, ease: 'easeInOut' } : {}}
-        className="w-16 h-16 bg-gradient-to-br from-prestigio-900 to-prestigio-700 rounded-full shadow-lg flex items-center justify-center border-4 border-white"
-        title="Habla con PrestIA"
-      >
-        {abierto ? <X size={24} className="text-white" /> : <span className="text-white text-xl font-bold">P</span>}
-      </motion.button>
-
-      {/* Notification dot */}
-      {!abierto && (
-        <motion.div
-          initial={{ scale: 0 }}
-          animate={{ scale: 1 }}
-          className="absolute -top-1 -right-1 w-5 h-5 bg-oliva-500 rounded-full flex items-center justify-center"
+      <div className="flex items-center gap-2">
+        {!abierto && (
+          <motion.div
+            initial={{ opacity: 0, x: 10 }}
+            animate={{ opacity: 1, x: 0 }}
+            className="bg-white rounded-full shadow-lg px-3 py-2 border border-prestigio-200"
+          >
+            <span className="text-xs font-semibold text-prestigio-800 whitespace-nowrap">¿Dudas? Pregúntame</span>
+          </motion.div>
+        )}
+        <motion.button
+          onClick={() => setAbierto(!abierto)}
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          animate={!abierto ? { y: [0, -4, 0] } : {}}
+          transition={!abierto ? { repeat: Infinity, duration: 2.5, ease: 'easeInOut' } : {}}
+          className="bg-gradient-to-br from-prestigio-900 to-prestigio-700 rounded-full shadow-lg flex items-center justify-center border-4 border-white px-4 py-3 gap-2"
+          title="Habla con PrestIA"
         >
-          <span className="text-white text-xs font-bold">1</span>
-        </motion.div>
-      )}
+          {abierto ? (
+            <X size={22} className="text-white" />
+          ) : (
+            <span className="text-white text-sm font-bold tracking-wide">PrestIA</span>
+          )}
+        </motion.button>
+      </div>
     </div>
   )
 }

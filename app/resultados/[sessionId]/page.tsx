@@ -20,7 +20,7 @@ const CATEGORIAS = [
   {
     id: 'liquidez',
     titulo: '1. Liquidez',
-    indicadores: ['EBITDA / Intereses', 'Ciclo Financiero', 'Palanca de Crecimiento'],
+    indicadores: ['EBITDA / Intereses', 'Rotación de Cartera', 'Rotación de Inventarios', 'Rotación de Proveedores', 'Ciclo Financiero', 'Palanca de Crecimiento'],
   },
   {
     id: 'endeudamiento',
@@ -46,7 +46,7 @@ function generarRecomendaciones(ind: IndicadoresAnio): string[] {
   if (ind.palancaCrecimiento < 1) {
     recs.push('Tu Palanca de Crecimiento (PDC) es menor a 1, lo que significa que al crecer necesitas más caja. Reduce el KTNO mejorando la rotación de cartera o inventarios.')
   } else {
-    recs.push('¡Excelente! Tu PDC > 1 significa que al crecer generas caja. Es el momento de invertir en crecimiento.')
+    recs.push('¡Excelente! Tu Palanca de Crecimiento (PDC) > 1 significa que al crecer generas caja. Es el momento de invertir en crecimiento.')
   }
 
   if (ind.endeudamiento > 0.7) {
@@ -213,8 +213,8 @@ export default function ResultadosPage() {
             </h3>
             <p className="text-sm text-gray-700 leading-relaxed">
               {indActual.palancaCrecimiento > 1
-                ? `¡Excelente! Tu PDC de ${indActual.palancaCrecimiento.toFixed(2)} indica que por cada peso que crece tu empresa, genera ${((indActual.palancaCrecimiento - 1) * 100).toFixed(0)} centavos adicionales de caja. Crecer es rentable para ti.`
-                : `Tu PDC de ${indActual.palancaCrecimiento.toFixed(2)} indica que al crecer necesitas inyectar caja adicional. El objetivo es llevar el PDC > 1 reduciendo el KTNO o mejorando el EBITDA.`}
+                ? `¡Excelente! Tu Palanca de Crecimiento (PDC) de ${indActual.palancaCrecimiento.toFixed(2)} indica que por cada peso que crece tu empresa, genera ${((indActual.palancaCrecimiento - 1) * 100).toFixed(0)} centavos adicionales de caja. Crecer es rentable para ti.`
+                : `Tu Palanca de Crecimiento (PDC) de ${indActual.palancaCrecimiento.toFixed(2)} indica que al crecer necesitas inyectar caja adicional. El objetivo es llevar el PDC > 1 reduciendo el KTNO o mejorando el EBITDA.`}
             </p>
           </div>
         </motion.section>

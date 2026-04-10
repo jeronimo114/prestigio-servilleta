@@ -78,7 +78,7 @@ export async function POST(req: NextRequest) {
     setInput('F8', derivAnt.utilidadBruta)
     setInput('F9', derivAnt.ebitda)
     setInput('F10', derivAnt.utilidadOperacional)
-    setInput('F11', datosAnioAnterior.intereses || 0)
+    setInput('F11', (datosAnioAnterior.intereses || 0) + (datosAnioAnterior.amortizacionDeuda || 0))
     setInput('F12', datosAnioAnterior.impuestos)
     setInput('F13', datosAnioAnterior.otrosIngresosEgresos || 0)
 
@@ -87,7 +87,7 @@ export async function POST(req: NextRequest) {
     setInput('H8', derivAct.utilidadBruta)
     setInput('H9', derivAct.ebitda)
     setInput('H10', derivAct.utilidadOperacional)
-    setInput('H11', datosAnioActual.intereses || 0)
+    setInput('H11', (datosAnioActual.intereses || 0) + (datosAnioActual.amortizacionDeuda || 0))
     setInput('H12', datosAnioActual.impuestos)
     setInput('H13', datosAnioActual.otrosIngresosEgresos || 0)
 
@@ -157,6 +157,13 @@ export async function POST(req: NextRequest) {
 
       setMini('C14', datosAnioAnterior.proveedores)
       setMini('D14', datosAnioActual.proveedores)
+
+      // Servicio de la deuda y dividendos (amortización a capital)
+      setMini('C15', datosAnioAnterior.amortizacionDeuda || 0)
+      setMini('D15', datosAnioActual.amortizacionDeuda || 0)
+
+      setMini('C16', datosAnioAnterior.dividendos || 0)
+      setMini('D16', datosAnioActual.dividendos || 0)
     }
 
     // Generate xlsx buffer

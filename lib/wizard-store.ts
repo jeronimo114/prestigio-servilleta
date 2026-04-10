@@ -16,6 +16,7 @@ const DATOS_ANTERIORES_PREFILL: DatosAnio = {
   ebitda: 825,
   utilidadOperacional: 680,
   intereses: 145,
+  amortizacionDeuda: 390,
   impuestos: 178,
   otrosIngresosEgresos: 32,
   // Balance General 2024 - Activos
@@ -31,7 +32,6 @@ const DATOS_ANTERIORES_PREFILL: DatosAnio = {
   capitalSuperavit: 650,
   totalPatrimonio: 1000,
   // Servilleta
-  servicioDeuda: 535,
   dividendos: 0,
 }
 
@@ -45,6 +45,7 @@ const DATOS_ACTUALES_PREFILL: DatosAnio = {
   ebitda: 1015,
   utilidadOperacional: 845,
   intereses: 132,
+  amortizacionDeuda: 355,
   impuestos: 225,
   otrosIngresosEgresos: 18,
   // Balance General 2025 - Activos
@@ -60,7 +61,6 @@ const DATOS_ACTUALES_PREFILL: DatosAnio = {
   capitalSuperavit: 750,
   totalPatrimonio: 1465,
   // Servilleta
-  servicioDeuda: 487,
   dividendos: 50,
 }
 
@@ -149,7 +149,7 @@ export const useWizardStore = create<WizardState>()(
     }),
     {
       name: 'servilleta-wizard',
-      version: 2,
+      version: 3,
       migrate: () => {
         // Versión anterior no tenía costosTotales, gastosTotales, etc.
         // Resetear a valores por defecto

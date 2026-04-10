@@ -10,7 +10,8 @@ export interface DatosAnio {
   utilidadBruta: number              // = ingresos - costos
   ebitda: number                     // = utilidadOperacional + dep&amort
   utilidadOperacional: number        // = ingresos - costos - gastos
-  intereses: number                  // Parte del servicio de la deuda
+  intereses: number                  // Intereses financieros pagados
+  amortizacionDeuda: number          // Abono a capital de la deuda
   impuestos: number
   otrosIngresosEgresos: number
 
@@ -30,7 +31,6 @@ export interface DatosAnio {
   totalPatrimonio: number
 
   // Servilleta: campos adicionales para flujo de caja
-  servicioDeuda: number              // Intereses + abono a capital
   dividendos: number                 // Dividendos / capitalización
 }
 
