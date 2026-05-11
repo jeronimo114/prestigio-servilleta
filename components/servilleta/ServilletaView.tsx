@@ -201,12 +201,8 @@ function SeccionHeader({
 
 // ── Header de tabla con dos años ────────────────────────────────────
 function HeaderDosAnios({
-  anioAnterior,
-  anioActual,
   conCambio = false,
 }: {
-  anioAnterior: number
-  anioActual: number
   conCambio?: boolean
 }) {
   return (
@@ -214,8 +210,8 @@ function HeaderDosAnios({
       className={`grid ${conCambio ? 'grid-cols-[1fr_5rem_5rem_4rem] sm:grid-cols-[1fr_6rem_6rem_5rem]' : 'grid-cols-[1fr_5rem_5rem] sm:grid-cols-[1fr_6rem_6rem]'} gap-2 px-3 py-1.5 bg-gray-50 border-b border-gray-200 items-center`}
     >
       <span className="text-xs font-medium text-gray-500"></span>
-      <span className="text-xs font-medium text-gray-500 text-center">{anioAnterior}</span>
-      <span className="text-xs font-medium text-gray-500 text-center">{anioActual}</span>
+      <span className="text-xs font-medium text-gray-500 text-center">Año anterior</span>
+      <span className="text-xs font-medium text-gray-500 text-center">Año actual</span>
       {conCambio && <span className="text-xs font-medium text-gray-500 text-right">Cambio</span>}
     </div>
   )
@@ -362,7 +358,7 @@ interface Props {
 
 export function ServilletaView({ onNext, onPrev }: Props) {
   const store = useWizardStore()
-  const { anioAnterior, anioActual, datosAnioActual: act, datosAnioAnterior: ant } = store
+  const { datosAnioActual: act, datosAnioAnterior: ant } = store
 
   // P&G calculado por año
   const utilOpAnt = calcUtilidadOp(ant)
@@ -415,7 +411,7 @@ export function ServilletaView({ onNext, onPrev }: Props) {
       >
         <SeccionHeader titulo="Estado de Resultados (P&G)" completada={seccion1Completa} />
 
-        <HeaderDosAnios anioAnterior={anioAnterior} anioActual={anioActual} />
+        <HeaderDosAnios />
 
         <div className="divide-y divide-gray-100">
           <FilaInputDosAnios
@@ -467,7 +463,7 @@ export function ServilletaView({ onNext, onPrev }: Props) {
           {/* Margen EBITDA (año actual) */}
           <div className="px-3 py-2 bg-gray-50">
             <p className="text-xs text-gray-500">
-              Margen EBITDA {anioActual}:{' '}
+              Margen EBITDA:{' '}
               <motion.span
                 key={margenEbitdaAct.toFixed(1)}
                 initial={{ opacity: 0, y: -4 }}
@@ -496,7 +492,7 @@ export function ServilletaView({ onNext, onPrev }: Props) {
       >
         <SeccionHeader titulo="Balance — Capital de Trabajo" completada={seccion2Completa} />
 
-        <HeaderDosAnios anioAnterior={anioAnterior} anioActual={anioActual} conCambio />
+        <HeaderDosAnios conCambio />
 
         <div className="divide-y divide-gray-100">
           <FilaCambioDosAnios
@@ -548,9 +544,9 @@ export function ServilletaView({ onNext, onPrev }: Props) {
         animate="visible"
         className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm"
       >
-        <SeccionHeader titulo={`Flujo de Caja Libre (${anioActual})`} completada={seccion3Completa} />
+        <SeccionHeader titulo="Flujo de Caja Libre" completada={seccion3Completa} />
 
-        <HeaderDosAnios anioAnterior={anioAnterior} anioActual={anioActual} />
+        <HeaderDosAnios />
 
         <div className="divide-y divide-gray-100">
           <FilaCalcDosAnios label="EBITDA" valorAnt={ebitdaAnt} valorAct={ebitdaAct} />
@@ -572,7 +568,7 @@ export function ServilletaView({ onNext, onPrev }: Props) {
 
           {/* FCL año actual destacado */}
           <div className="bg-prestigio-100 border-l-4 border-prestigio-600 px-3 py-3 flex items-center justify-between">
-            <span className="text-sm font-bold text-prestigio-900">= Flujo de Caja Libre {anioActual}</span>
+            <span className="text-sm font-bold text-prestigio-900">= Flujo de Caja Libre</span>
             <ValorAnimado
               valor={fclAct}
               className="text-base font-bold text-prestigio-900"
@@ -589,9 +585,9 @@ export function ServilletaView({ onNext, onPrev }: Props) {
         animate="visible"
         className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm"
       >
-        <SeccionHeader titulo={`Caja Final (${anioActual})`} completada={seccion4Completa} />
+        <SeccionHeader titulo="Caja Final" completada={seccion4Completa} />
 
-        <HeaderDosAnios anioAnterior={anioAnterior} anioActual={anioActual} />
+        <HeaderDosAnios />
 
         <div className="divide-y divide-gray-100">
           {/* FCL referencia */}
@@ -646,7 +642,7 @@ export function ServilletaView({ onNext, onPrev }: Props) {
               cajaFinalAct >= 0 ? 'border-green-500' : 'border-red-500'
             }`}
           >
-            <span className="text-base font-bold text-gray-900">= CAJA FINAL {anioActual}</span>
+            <span className="text-base font-bold text-gray-900">= CAJA FINAL</span>
             <ValorAnimado
               valor={cajaFinalAct}
               className={`text-base font-bold ${cajaFinalAct >= 0 ? 'text-green-700' : 'text-red-700'}`}
