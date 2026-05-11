@@ -11,29 +11,6 @@ import { DownloadButton } from '@/components/resultados/DownloadButton'
 import { MascotaAI } from '@/components/asistente/MascotaAI'
 import type { IndicadoresAnio } from '@/types/servilleta'
 
-const CATEGORIAS = [
-  {
-    id: 'rentabilidad',
-    titulo: '2. Rentabilidad',
-    indicadores: ['Margen EBITDA', 'Margen Neto', 'Crecimiento en Ventas'],
-  },
-  {
-    id: 'liquidez',
-    titulo: '1. Liquidez',
-    indicadores: ['EBITDA / Intereses', 'Rotación de Cartera', 'Rotación de Inventarios', 'Rotación de Proveedores', 'Ciclo Financiero', 'Palanca de Crecimiento'],
-  },
-  {
-    id: 'endeudamiento',
-    titulo: '3. Endeudamiento',
-    indicadores: ['Endeudamiento', 'Endeudamiento Financiero'],
-  },
-  {
-    id: 'palanca',
-    titulo: '4. Palanca de Crecimiento',
-    indicadores: ['Palanca de Crecimiento'],
-  },
-]
-
 function generarRecomendaciones(ind: IndicadoresAnio): string[] {
   const recs: string[] = []
 
@@ -49,12 +26,10 @@ function generarRecomendaciones(ind: IndicadoresAnio): string[] {
     recs.push('¡Excelente! Tu Palanca de Crecimiento (PDC) > 1 significa que al crecer generas caja. Es el momento de invertir en crecimiento.')
   }
 
-  if (ind.endeudamiento > 0.7) {
-    recs.push('Tu nivel de endeudamiento es alto. Prioriza reducir deuda antes de tomar nuevos créditos y mejora la generación de caja operativa.')
-  }
-
   if (ind.cicloFinancieroDias > 120) {
     recs.push(`Tu ciclo financiero de ${Math.round(ind.cicloFinancieroDias)} días es extenso. Negocia mejores plazos con proveedores y acelera el cobro de cartera.`)
+  } else if (ind.cicloFinancieroDias < 0) {
+    recs.push(`Tu ciclo financiero es de ${Math.round(ind.cicloFinancieroDias)} días — negativo significa que tus proveedores financian tu operación. Eso es positivo: estás usando crédito comercial sin costo.`)
   }
 
   if (ind.crecimientoVentas < 0) {

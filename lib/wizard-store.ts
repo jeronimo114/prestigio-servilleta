@@ -11,6 +11,8 @@ const DATOS_ANTERIORES_PREFILL: DatosAnio = {
   ingresosOperacionales: 4850,
   costosTotales: 2665,
   gastosTotales: 1505,
+  depreciaciones: 95,
+  amortizaciones: 50,
   depreciacionesAmortizaciones: 145,
   utilidadBruta: 2185,
   ebitda: 825,
@@ -33,6 +35,7 @@ const DATOS_ANTERIORES_PREFILL: DatosAnio = {
   totalPatrimonio: 1000,
   // Servilleta
   dividendos: 0,
+  capitalizacion: 0,
 }
 
 const DATOS_ACTUALES_PREFILL: DatosAnio = {
@@ -40,6 +43,8 @@ const DATOS_ACTUALES_PREFILL: DatosAnio = {
   ingresosOperacionales: 5620,
   costosTotales: 2980,
   gastosTotales: 1795,
+  depreciaciones: 110,
+  amortizaciones: 60,
   depreciacionesAmortizaciones: 170,
   utilidadBruta: 2640,
   ebitda: 1015,
@@ -62,6 +67,7 @@ const DATOS_ACTUALES_PREFILL: DatosAnio = {
   totalPatrimonio: 1465,
   // Servilleta
   dividendos: 50,
+  capitalizacion: 100,
 }
 
 export interface WizardState {
@@ -96,8 +102,9 @@ export interface WizardState {
 function recalcularDerivados(datos: DatosAnio): DatosAnio {
   const utilidadBruta = (datos.ingresosOperacionales || 0) - (datos.costosTotales || 0)
   const utilidadOperacional = utilidadBruta - (datos.gastosTotales || 0)
-  const ebitda = utilidadOperacional + (datos.depreciacionesAmortizaciones || 0)
-  return { ...datos, utilidadBruta, utilidadOperacional, ebitda }
+  const depAmort = (datos.depreciaciones || 0) + (datos.amortizaciones || 0)
+  const ebitda = utilidadOperacional + depAmort
+  return { ...datos, utilidadBruta, utilidadOperacional, ebitda, depreciacionesAmortizaciones: depAmort }
 }
 
 const ESTADO_INICIAL = {
@@ -149,10 +156,9 @@ export const useWizardStore = create<WizardState>()(
     }),
     {
       name: 'servilleta-wizard',
-      version: 3,
+      version: 4,
       migrate: () => {
-        // Versión anterior no tenía costosTotales, gastosTotales, etc.
-        // Resetear a valores por defecto
+        // v4: separación de depreciaciones/amortizaciones, capitalización, ambos años en P&G
         return {
           ...ESTADO_INICIAL,
           datosAnioAnterior: { ...DATOS_ANTERIORES_PREFILL },

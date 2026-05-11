@@ -5,50 +5,76 @@ function safe(numerador: number, denominador: number, fallback = 0): number {
   return numerador / denominador
 }
 
+// Devuelve depreciaciones + amortizaciones, prefiriendo los campos separados.
+function depAmortTotal(d: DatosAnio): number {
+  const sep = (d.depreciaciones || 0) + (d.amortizaciones || 0)
+  return sep > 0 ? sep : (d.depreciacionesAmortizaciones || 0)
+}
+
 export function calcularDerivedosAnio(datos: DatosAnio): {
   utilidadNeta: number
   totalActivos: number
   totalObligacionesFinancieras: number
   totalPasivos: number
 } {
-  // Derivados del P&G usando nuevos campos
   const utilidadOperacional = (datos.ingresosOperacionales || 0) - (datos.costosTotales || 0) - (datos.gastosTotales || 0)
-  const ebitda = utilidadOperacional + (datos.depreciacionesAmortizaciones || 0)
   const intereses = datos.intereses || 0
-  const utilidadNeta = utilidadOperacional - (intereses || 0) - (datos.impuestos || 0) + (datos.otrosIngresosEgresos || 0)
+  const utilidadNeta = utilidadOperacional - intereses - (datos.impuestos || 0) + (datos.otrosIngresosEgresos || 0)
 
   const totalActivos =
     (datos.carteraNeta || 0) + (datos.inventarios || 0) + (datos.activosFijosNetos || 0) + (datos.otrosActivos || 0)
   const totalObligacionesFinancieras =
-    datos.obligacionesFinancierasCP + datos.obligacionesFinancierasLP
+    (datos.obligacionesFinancierasCP || 0) + (datos.obligacionesFinancierasLP || 0)
   const totalPasivos =
-    totalObligacionesFinancieras + datos.proveedores + datos.otrosPasivos
+    totalObligacionesFinancieras + (datos.proveedores || 0) + (datos.otrosPasivos || 0)
 
   return { utilidadNeta, totalActivos, totalObligacionesFinancieras, totalPasivos }
 }
 
-// Anos de deuda LP (mismo default que el Excel, celda H54)
-const ANIOS_DEUDA_LP = 2
+// Flujo de Caja Libre — única fuente de verdad usada por UI e indicadores.
+export function calcularFCL(datos: DatosAnio, datosAnterior?: DatosAnio): number {
+  const ing = datos.ingresosOperacionales || 0
+  const utilidadOperacional = ing - (datos.costosTotales || 0) - (datos.gastosTotales || 0)
+  const ebitda = utilidadOperacional + depAmortTotal(datos)
+
+  if (!datosAnterior) return 0
+
+  const deltaCartera = (datosAnterior.carteraNeta || 0) - (datos.carteraNeta || 0)
+  const deltaInventarios = (datosAnterior.inventarios || 0) - (datos.inventarios || 0)
+  const deltaProveedores = (datos.proveedores || 0) - (datosAnterior.proveedores || 0)
+  const deltaAF = (datosAnterior.activosFijosNetos || 0) - (datos.activosFijosNetos || 0)
+
+  return ebitda + deltaCartera + deltaInventarios + deltaProveedores + deltaAF - (datos.impuestos || 0)
+}
+
+// Caja Final — fórmula unificada. UI e indicadores deben llamar esta misma función.
+//   Caja Final = FCL - Intereses - Amortización Capital - Dividendos + Capitalización
+export function calcularCajaFinal(datos: DatosAnio, datosAnterior?: DatosAnio): number {
+  const fcl = calcularFCL(datos, datosAnterior)
+  const intereses = datos.intereses || 0
+  const amortizacion = datos.amortizacionDeuda || 0
+  const dividendos = datos.dividendos || 0
+  const capitalizacion = datos.capitalizacion || 0
+  return fcl - intereses - amortizacion - dividendos + capitalizacion
+}
 
 export function calcularIndicadores(
   datos: DatosAnio,
   datosAnterior?: DatosAnio
 ): IndicadoresAnio {
   const derivados = calcularDerivedosAnio(datos)
-  const { utilidadNeta, totalActivos, totalObligacionesFinancieras, totalPasivos } = derivados
+  const { totalObligacionesFinancieras, totalActivos, totalPasivos } = derivados
 
-  const ing = datos.ingresosOperacionales
-  // Costo de ventas = costosTotales (nuevo campo directo)
-  const costo = datos.costosTotales
-  // EBITDA calculado desde inputs
-  const utilidadOperacional = ing - datos.costosTotales - datos.gastosTotales
-  const ebitda = utilidadOperacional + datos.depreciacionesAmortizaciones
+  const ing = datos.ingresosOperacionales || 0
+  const costo = datos.costosTotales || 0
+  const utilidadOperacional = ing - costo - (datos.gastosTotales || 0)
+  const ebitda = utilidadOperacional + depAmortTotal(datos)
 
   // 1. Liquidez
-  const ktno = datos.carteraNeta + datos.inventarios - datos.proveedores
-  const rotacionCarteraDias = ing > 0 ? (datos.carteraNeta * 365) / ing : 0
-  const rotacionInventariosDias = costo > 0 ? (datos.inventarios * 365) / costo : 0
-  const rotacionProveedoresDias = costo > 0 ? (datos.proveedores * 365) / costo : 0
+  const ktno = (datos.carteraNeta || 0) + (datos.inventarios || 0) - (datos.proveedores || 0)
+  const rotacionCarteraDias = ing > 0 ? ((datos.carteraNeta || 0) * 365) / ing : 0
+  const rotacionInventariosDias = costo > 0 ? ((datos.inventarios || 0) * 365) / costo : 0
+  const rotacionProveedoresDias = costo > 0 ? ((datos.proveedores || 0) * 365) / costo : 0
   const cicloFinancieroDias = rotacionCarteraDias + rotacionInventariosDias - rotacionProveedoresDias
 
   const intereses = datos.intereses || 0
@@ -56,39 +82,27 @@ export function calcularIndicadores(
   const ebitdaIntereses = safe(ebitda, intereses)
   const pasivoFinancieroEbitda = safe(totalObligacionesFinancieras, ebitda)
 
-  // Flujo de Caja Libre (requiere datos del ano anterior)
-  let flujoCajaLibre = 0
-  const servicioDeudaIntereses = intereses
-  const servicioDeudaAmortizacion = amortizacionDeuda
+  // Flujo de Caja Libre + Caja Final (fórmulas unificadas)
+  const flujoCajaLibre = calcularFCL(datos, datosAnterior)
+  const cajaPeriodo = datosAnterior ? calcularCajaFinal(datos, datosAnterior) : 0
+  const totalServicioDeuda = intereses + amortizacionDeuda
+  const fclSD = totalServicioDeuda > 0 ? flujoCajaLibre / totalServicioDeuda : 0
+
   let cambioEnDeuda = 0
-  let cajaPeriodo = 0
-  let fclSD = 0
-
   if (datosAnterior) {
-    // Deltas del balance (ano anterior - ano actual)
-    const deltaCartera = datosAnterior.carteraNeta - datos.carteraNeta
-    const deltaInventarios = datosAnterior.inventarios - datos.inventarios
-    const deltaAF = datosAnterior.activosFijosNetos - datos.activosFijosNetos
-    const deltaProveedores = datos.proveedores - datosAnterior.proveedores
-    flujoCajaLibre = ebitda + deltaCartera + deltaInventarios + deltaAF + deltaProveedores - datos.impuestos
-
-    const obligActual = datos.obligacionesFinancierasCP + datos.obligacionesFinancierasLP
-    const obligAnterior = datosAnterior.obligacionesFinancierasCP + datosAnterior.obligacionesFinancierasLP
+    const obligActual = (datos.obligacionesFinancierasCP || 0) + (datos.obligacionesFinancierasLP || 0)
+    const obligAnterior = (datosAnterior.obligacionesFinancierasCP || 0) + (datosAnterior.obligacionesFinancierasLP || 0)
     cambioEnDeuda = obligActual - obligAnterior
-
-    const totalServicioDeuda = servicioDeudaIntereses + servicioDeudaAmortizacion
-    cajaPeriodo = flujoCajaLibre - totalServicioDeuda - (datos.dividendos || 0)
-    fclSD = totalServicioDeuda > 0 ? flujoCajaLibre / totalServicioDeuda : 0
   }
 
   // 2. Rentabilidad
   const crecimientoVentas = datosAnterior
-    ? safe(ing - datosAnterior.ingresosOperacionales, datosAnterior.ingresosOperacionales)
+    ? safe(ing - (datosAnterior.ingresosOperacionales || 0), datosAnterior.ingresosOperacionales || 0)
     : 0
   const margenEbitda = safe(ebitda, ing)
-  const margenNeto = safe(utilidadNeta, ing)
+  const margenNeto = safe(derivados.utilidadNeta, ing)
 
-  // 3. Endeudamiento
+  // 3. Endeudamiento (calculados pero no se muestran como cards)
   const endeudamiento = safe(totalPasivos, totalActivos)
   const endeudamientoFinanciero = safe(totalObligacionesFinancieras, ing)
 
@@ -105,8 +119,8 @@ export function calcularIndicadores(
     ebitdaIntereses,
     pasivoFinancieroEbitda,
     flujoCajaLibre,
-    servicioDeudaIntereses,
-    servicioDeudaAmortizacion,
+    servicioDeudaIntereses: intereses,
+    servicioDeudaAmortizacion: amortizacionDeuda,
     cambioEnDeuda,
     cajaPeriodo,
     fclSD,
@@ -119,28 +133,16 @@ export function calcularIndicadores(
   }
 }
 
-// Semaforos segun rangos estandar Prestigio
+// Semáforos según rangos estándar Prestigio (pendientes de validación con Bancolombia)
 export function semaforo(indicador: string, valor: number): SemaforoColor {
   switch (indicador) {
     case 'margenEbitda':
       if (valor >= 0.15) return 'verde'
       if (valor >= 0.05) return 'amarillo'
       return 'rojo'
-    case 'margenNeto':
-      if (valor >= 0.1) return 'verde'
-      if (valor >= 0.02) return 'amarillo'
-      return 'rojo'
     case 'crecimientoVentas':
       if (valor >= 0.1) return 'verde'
       if (valor >= 0) return 'amarillo'
-      return 'rojo'
-    case 'endeudamiento':
-      if (valor <= 0.5) return 'verde'
-      if (valor <= 0.7) return 'amarillo'
-      return 'rojo'
-    case 'endeudamientoFinanciero':
-      if (valor <= 0.3) return 'verde'
-      if (valor <= 0.5) return 'amarillo'
       return 'rojo'
     case 'palancaCrecimiento':
       if (valor > 1) return 'verde'
@@ -164,12 +166,9 @@ export function semaforo(indicador: string, valor: number): SemaforoColor {
       if (valor >= 15) return 'amarillo'
       return 'rojo'
     case 'cicloFinancieroDias':
+      // Negativo o bajo = excelente (proveedores financian la operación)
       if (valor <= 60) return 'verde'
       if (valor <= 120) return 'amarillo'
-      return 'rojo'
-    case 'pasivoFinancieroEbitda':
-      if (valor <= 2) return 'verde'
-      if (valor <= 3.5) return 'amarillo'
       return 'rojo'
     case 'fclSD':
       if (valor >= 1.5) return 'verde'
@@ -180,6 +179,9 @@ export function semaforo(indicador: string, valor: number): SemaforoColor {
   }
 }
 
+// Sólo indicadores derivables de los datos que pedimos (mini servilleta).
+// Removidos: Margen Neto, Endeudamiento, Endeudamiento Financiero, Pasivo Financiero/EBITDA
+// (requieren obligaciones financieras separadas u otros ingresos/egresos que no recolectamos).
 export function indicadoresConSemaforo(ind: IndicadoresAnio): IndicadorConSemaforo[] {
   return [
     // Rentabilidad
@@ -188,13 +190,6 @@ export function indicadoresConSemaforo(ind: IndicadoresAnio): IndicadorConSemafo
       valor: ind.margenEbitda,
       semaforo: semaforo('margenEbitda', ind.margenEbitda),
       descripcion: 'Qué porcentaje de tus ventas se convierte en EBITDA',
-      formato: 'porcentaje',
-    },
-    {
-      nombre: 'Margen Neto',
-      valor: ind.margenNeto,
-      semaforo: semaforo('margenNeto', ind.margenNeto),
-      descripcion: 'Utilidad neta por cada peso vendido',
       formato: 'porcentaje',
     },
     {
@@ -210,13 +205,6 @@ export function indicadoresConSemaforo(ind: IndicadoresAnio): IndicadorConSemafo
       valor: ind.ebitdaIntereses,
       semaforo: semaforo('ebitdaIntereses', ind.ebitdaIntereses),
       descripcion: 'Capacidad de pagar intereses con EBITDA',
-      formato: 'veces',
-    },
-    {
-      nombre: 'Pasivo Financiero / EBITDA',
-      valor: ind.pasivoFinancieroEbitda,
-      semaforo: semaforo('pasivoFinancieroEbitda', ind.pasivoFinancieroEbitda),
-      descripcion: 'Años necesarios para pagar deuda financiera con EBITDA',
       formato: 'veces',
     },
     {
@@ -244,23 +232,8 @@ export function indicadoresConSemaforo(ind: IndicadoresAnio): IndicadorConSemafo
       nombre: 'Ciclo Financiero',
       valor: ind.cicloFinancieroDias,
       semaforo: semaforo('cicloFinancieroDias', ind.cicloFinancieroDias),
-      descripcion: 'Días que tardas en convertir inventario en caja',
+      descripcion: 'Días que tardas en convertir inventario en caja. Negativo significa que tus proveedores financian la operación (positivo para el negocio).',
       formato: 'dias',
-    },
-    // Endeudamiento
-    {
-      nombre: 'Endeudamiento',
-      valor: ind.endeudamiento,
-      semaforo: semaforo('endeudamiento', ind.endeudamiento),
-      descripcion: '% de los activos financiados con deuda',
-      formato: 'porcentaje',
-    },
-    {
-      nombre: 'Endeudamiento Financiero',
-      valor: ind.endeudamientoFinanciero,
-      semaforo: semaforo('endeudamientoFinanciero', ind.endeudamientoFinanciero),
-      descripcion: 'Peso de la deuda financiera sobre ingresos',
-      formato: 'porcentaje',
     },
     // Palanca de Crecimiento
     {

@@ -36,6 +36,17 @@ yarn-error.log*
 # vercel
 .vercel
 
+# playwright debug artifacts
+.playwright-mcp/
+
+# working screenshots
+/screenshots/
+/*.png
+
+# large local assets (not deployed)
+/media/
+/servilleta.xlsm
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts

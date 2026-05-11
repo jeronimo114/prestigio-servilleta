@@ -4,11 +4,14 @@ export interface DatosAnio {
   ingresosOperacionales: number
   costosTotales: number              // Costos de ventas / producción
   gastosTotales: number              // Gastos operacionales (admin + ventas)
-  depreciacionesAmortizaciones: number // Si no tiene, pone 0
+  depreciaciones: number             // Desgaste de activos fijos
+  amortizaciones: number             // Amortización de intangibles
+  // Legacy combinado — derivado: depreciaciones + amortizaciones
+  depreciacionesAmortizaciones: number
 
   // Calculados del P&G (no los llena el usuario)
   utilidadBruta: number              // = ingresos - costos
-  ebitda: number                     // = utilidadOperacional + dep&amort
+  ebitda: number                     // = utilidadOperacional + dep + amort
   utilidadOperacional: number        // = ingresos - costos - gastos
   intereses: number                  // Intereses financieros pagados
   amortizacionDeuda: number          // Abono a capital de la deuda
@@ -31,7 +34,8 @@ export interface DatosAnio {
   totalPatrimonio: number
 
   // Servilleta: campos adicionales para flujo de caja
-  dividendos: number                 // Dividendos / capitalización
+  dividendos: number                 // Dividendos repartidos a socios
+  capitalizacion: number             // Aportes de socios al negocio
 }
 
 export interface DatosEmpresa {

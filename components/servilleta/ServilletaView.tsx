@@ -3,14 +3,17 @@
 import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence, useAnimationControls } from 'framer-motion'
 import { useWizardStore } from '@/lib/wizard-store'
+import { calcularCajaFinal, calcularFCL } from '@/lib/indicadores'
 import { HelpCircle, X, CheckCircle2 } from 'lucide-react'
+import type { DatosAnio } from '@/types/servilleta'
 
 // ── Tooltips ────────────────────────────────────────────────────────
 const TIPS: Record<string, string> = {
   ingresos: 'Todo el dinero que entra por la venta de tus productos o servicios. Es la línea principal de tu Estado de Resultados.',
   costos: 'Lo que te cuesta producir o comprar lo que vendes: materia prima, mano de obra directa, etc.',
   gastos: 'Gastos de administración, ventas, arriendo, nómina administrativa, publicidad, etc.',
-  depAmort: 'Desgaste de tus activos fijos (maquinaria, vehículos, equipos). Si no tienes, pon 0.',
+  depreciaciones: 'Desgaste de tus activos fijos tangibles (maquinaria, vehículos, equipos). Si no tienes, pon 0.',
+  amortizaciones: 'Distribución del costo de activos intangibles (software, marcas, licencias). Si no tienes, pon 0.',
   cartera: 'Dinero que te deben tus clientes (cuentas por cobrar).',
   inventarios: 'Mercancía o materia prima que tienes en bodega.',
   proveedores: 'Dinero que tú le debes a tus proveedores.',
@@ -19,6 +22,7 @@ const TIPS: Record<string, string> = {
   intereses: 'Lo que le pagas al banco por el uso del dinero prestado (intereses de tus créditos).',
   amortizacionDeuda: 'El abono a capital que reduces de tu deuda (sin contar intereses).',
   dividendos: 'Dinero distribuido a los socios. Si no repartiste, pon 0.',
+  capitalizacion: 'Aportes adicionales de capital de los socios al negocio. Si no hubo, pon 0.',
 }
 
 // ── Formato de números ──────────────────────────────────────────────
@@ -115,62 +119,7 @@ function ValorAnimado({
   )
 }
 
-// ── Mini componente de input inline ─────────────────────────────────
-function CampoInline({
-  value,
-  onChange,
-  tip,
-}: {
-  value: number
-  onChange: (v: number) => void
-  tip?: string
-}) {
-  const [focused, setFocused] = useState(false)
-  const [display, setDisplay] = useState('')
-
-  function handleFocus() {
-    setFocused(true)
-    setDisplay(value > 0 ? String(value) : '')
-  }
-
-  function handleBlur() {
-    setFocused(false)
-    setDisplay('')
-  }
-
-  function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const raw = e.target.value.replace(/[^0-9.]/g, '')
-    setDisplay(raw)
-    const num = parseFloat(raw)
-    onChange(isNaN(num) ? 0 : num)
-  }
-
-  const shown = focused ? display : (value > 0 ? fmt(value) : '')
-
-  return (
-    <span className="inline-flex items-center gap-1.5">
-      <span className="text-gray-400 text-sm">$</span>
-      <input
-        type="text"
-        inputMode="decimal"
-        value={shown}
-        onChange={handleChange}
-        onFocus={handleFocus}
-        onBlur={handleBlur}
-        placeholder="0"
-        className={`w-24 sm:w-28 text-right text-sm font-semibold border-b-2 border-amber-400 bg-amber-50/60 px-1.5 py-1 outline-none transition-all duration-200 rounded-t-sm ${
-          focused
-            ? 'border-amber-600 bg-amber-50 shadow-[0_2px_8px_rgba(245,158,11,0.25)] scale-[1.02]'
-            : 'hover:bg-amber-50/80'
-        }`}
-      />
-      <span className="text-gray-400 text-xs">M</span>
-      {tip && <Tooltip text={tip} />}
-    </span>
-  )
-}
-
-// ── Mini input para la tabla de dos años ─────────────────────────────
+// ── Mini input para celdas de tabla ─────────────────────────────────
 function CampoTabla({
   value,
   onChange,
@@ -218,52 +167,6 @@ function CampoTabla({
   )
 }
 
-// ── Fila calculada con animación ────────────────────────────────────
-function FilaCalculada({
-  label,
-  valor,
-  highlight = false,
-}: {
-  label: string
-  valor: number
-  highlight?: boolean
-}) {
-  const changed = useValueChanged(valor)
-
-  return (
-    <motion.div
-      animate={changed ? { backgroundColor: ['rgba(0,114,126,0.15)', 'rgba(0,114,126,0)'] } : {}}
-      transition={{ duration: 0.6 }}
-      className={`flex items-center justify-between py-2 px-3 ${
-        highlight
-          ? 'bg-prestigio-100 border-l-4 border-prestigio-600 rounded-r-lg'
-          : 'bg-prestigio-50/50'
-      }`}
-    >
-      <span className={`text-sm ${highlight ? 'font-bold text-prestigio-900' : 'font-semibold text-prestigio-800'}`}>
-        {label}
-      </span>
-      <ValorAnimado
-        valor={valor}
-        className={`text-sm font-bold ${highlight ? 'text-prestigio-900 text-base' : 'text-prestigio-700'}`}
-      />
-    </motion.div>
-  )
-}
-
-// ── Fila de referencia (valor traído de sección anterior) ───────────
-function FilaReferencia({ label, valor }: { label: string; valor: number }) {
-  const safe = isFinite(valor) && !isNaN(valor)
-  return (
-    <div className="flex items-center justify-between py-1.5 px-3">
-      <span className="text-sm text-gray-600">{label}</span>
-      <span className={`text-sm font-medium ${!safe ? 'text-gray-400' : valor >= 0 ? 'text-gray-700' : 'text-red-600'}`}>
-        $ {fmtSigned(valor)} M
-      </span>
-    </div>
-  )
-}
-
 // ── Indicador de sección completada ─────────────────────────────────
 function SeccionHeader({
   titulo,
@@ -296,6 +199,143 @@ function SeccionHeader({
   )
 }
 
+// ── Header de tabla con dos años ────────────────────────────────────
+function HeaderDosAnios({
+  anioAnterior,
+  anioActual,
+  conCambio = false,
+}: {
+  anioAnterior: number
+  anioActual: number
+  conCambio?: boolean
+}) {
+  return (
+    <div
+      className={`grid ${conCambio ? 'grid-cols-[1fr_5rem_5rem_4rem] sm:grid-cols-[1fr_6rem_6rem_5rem]' : 'grid-cols-[1fr_5rem_5rem] sm:grid-cols-[1fr_6rem_6rem]'} gap-2 px-3 py-1.5 bg-gray-50 border-b border-gray-200 items-center`}
+    >
+      <span className="text-xs font-medium text-gray-500"></span>
+      <span className="text-xs font-medium text-gray-500 text-center">{anioAnterior}</span>
+      <span className="text-xs font-medium text-gray-500 text-center">{anioActual}</span>
+      {conCambio && <span className="text-xs font-medium text-gray-500 text-right">Cambio</span>}
+    </div>
+  )
+}
+
+// ── Fila con dos inputs (un valor por año) ──────────────────────────
+function FilaInputDosAnios({
+  label,
+  tip,
+  valueAnt,
+  valueAct,
+  onChangeAnt,
+  onChangeAct,
+}: {
+  label: string
+  tip?: string
+  valueAnt: number
+  valueAct: number
+  onChangeAnt: (v: number) => void
+  onChangeAct: (v: number) => void
+}) {
+  return (
+    <div className="grid grid-cols-[1fr_5rem_5rem] sm:grid-cols-[1fr_6rem_6rem] gap-2 px-3 py-2 items-center">
+      <span className="text-sm text-gray-700 flex items-center gap-1">
+        {label} {tip && <Tooltip text={tip} />}
+      </span>
+      <CampoTabla value={valueAnt} onChange={onChangeAnt} />
+      <CampoTabla value={valueAct} onChange={onChangeAct} />
+    </div>
+  )
+}
+
+// ── Fila calculada con dos años ─────────────────────────────────────
+function FilaCalcDosAnios({
+  label,
+  valorAnt,
+  valorAct,
+  highlight = false,
+}: {
+  label: string
+  valorAnt: number
+  valorAct: number
+  highlight?: boolean
+}) {
+  const changedAct = useValueChanged(valorAct)
+
+  return (
+    <motion.div
+      animate={changedAct ? { backgroundColor: ['rgba(0,114,126,0.15)', 'rgba(0,114,126,0)'] } : {}}
+      transition={{ duration: 0.6 }}
+      className={`grid grid-cols-[1fr_5rem_5rem] sm:grid-cols-[1fr_6rem_6rem] gap-2 px-3 py-2 items-center ${
+        highlight
+          ? 'bg-prestigio-100 border-l-4 border-prestigio-600'
+          : 'bg-prestigio-50/50'
+      }`}
+    >
+      <span className={`text-sm ${highlight ? 'font-bold text-prestigio-900' : 'font-semibold text-prestigio-800'}`}>
+        {label}
+      </span>
+      <span className={`text-sm text-right font-medium ${highlight ? 'text-prestigio-900' : 'text-prestigio-700'}`}>
+        $ {fmt(valorAnt)}
+      </span>
+      <ValorAnimado
+        valor={valorAct}
+        prefix="$ "
+        suffix=""
+        className={`text-sm font-bold text-right ${highlight ? 'text-prestigio-900' : 'text-prestigio-700'}`}
+      />
+    </motion.div>
+  )
+}
+
+// ── Fila tabla con cambio (cartera/inventarios/proveedores) ─────────
+function FilaCambioDosAnios({
+  label,
+  tip,
+  valueAnt,
+  valueAct,
+  onChangeAnt,
+  onChangeAct,
+  invertirCambio = false,
+}: {
+  label: string
+  tip?: string
+  valueAnt: number
+  valueAct: number
+  onChangeAnt: (v: number) => void
+  onChangeAct: (v: number) => void
+  invertirCambio?: boolean
+}) {
+  const cambio = invertirCambio ? valueAct - valueAnt : valueAnt - valueAct
+  return (
+    <div className="grid grid-cols-[1fr_5rem_5rem_4rem] sm:grid-cols-[1fr_6rem_6rem_5rem] gap-2 px-3 py-2 items-center">
+      <span className="text-sm text-gray-700 flex items-center gap-1">
+        {label} {tip && <Tooltip text={tip} />}
+      </span>
+      <CampoTabla value={valueAnt} onChange={onChangeAnt} />
+      <CampoTabla value={valueAct} onChange={onChangeAct} />
+      <CambioAnimado valor={cambio} />
+    </div>
+  )
+}
+
+// ── Fila calculada simple con cambio (KTNO total, etc.) ─────────────
+function FilaCalcConCambio({ label, valor }: { label: string; valor: number }) {
+  const changed = useValueChanged(valor)
+  return (
+    <motion.div
+      animate={changed ? { backgroundColor: ['rgba(0,114,126,0.15)', 'rgba(0,114,126,0)'] } : {}}
+      transition={{ duration: 0.6 }}
+      className="grid grid-cols-[1fr_5rem_5rem_4rem] sm:grid-cols-[1fr_6rem_6rem_5rem] gap-2 px-3 py-2 items-center bg-prestigio-50/50"
+    >
+      <span className="col-span-3 text-sm font-semibold text-prestigio-800">{label}</span>
+      <span className={`text-sm font-bold text-right ${valor >= 0 ? 'text-prestigio-700' : 'text-red-600'}`}>
+        {fmtSigned(valor)}
+      </span>
+    </motion.div>
+  )
+}
+
 // ── Variantes de animación para secciones ───────────────────────────
 const sectionVariants = {
   hidden: { opacity: 0, y: 20 },
@@ -304,6 +344,14 @@ const sectionVariants = {
     y: 0,
     transition: { delay: i * 0.1, duration: 0.4, ease: 'easeOut' as const },
   }),
+}
+
+// ── Helpers de cálculo por año ──────────────────────────────────────
+function calcUtilidadOp(d: DatosAnio): number {
+  return (d.ingresosOperacionales || 0) - (d.costosTotales || 0) - (d.gastosTotales || 0)
+}
+function calcEbitda(d: DatosAnio): number {
+  return calcUtilidadOp(d) + (d.depreciaciones || 0) + (d.amortizaciones || 0)
 }
 
 // ── Componente principal ────────────────────────────────────────────
@@ -316,41 +364,31 @@ export function ServilletaView({ onNext, onPrev }: Props) {
   const store = useWizardStore()
   const { anioAnterior, anioActual, datosAnioActual: act, datosAnioAnterior: ant } = store
 
-  // Calculados P&G (con fallbacks a 0)
-  const ingresos = act.ingresosOperacionales || 0
-  const costos = act.costosTotales || 0
-  const gastos = act.gastosTotales || 0
-  const depAmort = act.depreciacionesAmortizaciones || 0
-  const utilidadOperativa = ingresos - costos - gastos
-  const ebitda = utilidadOperativa + depAmort
+  // P&G calculado por año
+  const utilOpAnt = calcUtilidadOp(ant)
+  const utilOpAct = calcUtilidadOp(act)
+  const ebitdaAnt = calcEbitda(ant)
+  const ebitdaAct = calcEbitda(act)
 
-  // Calculados Cambios
+  // Cambios
   const deltaCartera = (ant.carteraNeta || 0) - (act.carteraNeta || 0)
   const deltaInventarios = (ant.inventarios || 0) - (act.inventarios || 0)
   const deltaProveedores = (act.proveedores || 0) - (ant.proveedores || 0)
   const cambioKTNO = deltaCartera + deltaInventarios + deltaProveedores
-
   const deltaAF = (ant.activosFijosNetos || 0) - (act.activosFijosNetos || 0)
 
-  // FCL
-  const impuestos = act.impuestos || 0
-  const fcl = ebitda + cambioKTNO + deltaAF - impuestos
+  // FCL y Caja Final — usan funciones unificadas de indicadores.ts
+  const fclAct = calcularFCL(act, ant)
+  const cajaFinalAct = calcularCajaFinal(act, ant)
 
-  // Caja final
-  const interesesDeuda = act.intereses || 0
-  const amortDeuda = act.amortizacionDeuda || 0
-  const servDeuda = interesesDeuda + amortDeuda
-  const dividendos = act.dividendos || 0
-  const cajaFinal = fcl - servDeuda - dividendos
-
-  // Margen EBITDA
-  const margenEbitda = ingresos > 0 ? (ebitda / ingresos) * 100 : 0
+  // Margen EBITDA (año actual)
+  const margenEbitdaAct = act.ingresosOperacionales > 0 ? (ebitdaAct / act.ingresosOperacionales) * 100 : 0
 
   // Secciones completadas
-  const seccion1Completa = ingresos > 0 && costos > 0
+  const seccion1Completa = act.ingresosOperacionales > 0 && act.costosTotales > 0
   const seccion2Completa = (act.carteraNeta > 0 || act.inventarios > 0) && act.proveedores > 0
   const seccion3Completa = seccion1Completa && seccion2Completa
-  const seccion4Completa = seccion3Completa && (interesesDeuda > 0 || amortDeuda > 0)
+  const seccion4Completa = seccion3Completa && (act.intereses > 0 || act.amortizacionDeuda > 0)
 
   return (
     <div className="space-y-4">
@@ -363,7 +401,7 @@ export function ServilletaView({ onNext, onPrev }: Props) {
         <h2 className="text-xl font-bold text-prestigio-900">Tu Servilleta Financiera</h2>
         <p className="text-sm text-gray-500">
           Llena solo los campos en <span className="inline-block bg-amber-50 border-b-2 border-amber-400 px-1.5 text-amber-700 font-medium text-xs">amarillo</span>
-          {' '}y nosotros calculamos el resto
+          {' '}para ambos años — nosotros calculamos el resto
         </p>
       </motion.div>
 
@@ -375,72 +413,80 @@ export function ServilletaView({ onNext, onPrev }: Props) {
         animate="visible"
         className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm"
       >
-        <SeccionHeader titulo={`Estado de Resultados (${anioActual})`} completada={seccion1Completa} />
+        <SeccionHeader titulo="Estado de Resultados (P&G)" completada={seccion1Completa} />
+
+        <HeaderDosAnios anioAnterior={anioAnterior} anioActual={anioActual} />
 
         <div className="divide-y divide-gray-100">
-          <div className="flex items-center justify-between py-2.5 px-3">
-            <span className="text-sm text-gray-700">Ingresos Operacionales</span>
-            <CampoInline
-              value={act.ingresosOperacionales}
-              onChange={(v) => store.updateDatosActual('ingresosOperacionales', v)}
-              tip={TIPS.ingresos}
-            />
-          </div>
+          <FilaInputDosAnios
+            label="Ingresos Operacionales"
+            tip={TIPS.ingresos}
+            valueAnt={ant.ingresosOperacionales}
+            valueAct={act.ingresosOperacionales}
+            onChangeAnt={(v) => store.updateDatosAnterior('ingresosOperacionales', v)}
+            onChangeAct={(v) => store.updateDatosActual('ingresosOperacionales', v)}
+          />
+          <FilaInputDosAnios
+            label="(-) Costos Totales"
+            tip={TIPS.costos}
+            valueAnt={ant.costosTotales}
+            valueAct={act.costosTotales}
+            onChangeAnt={(v) => store.updateDatosAnterior('costosTotales', v)}
+            onChangeAct={(v) => store.updateDatosActual('costosTotales', v)}
+          />
+          <FilaInputDosAnios
+            label="(-) Gastos Totales"
+            tip={TIPS.gastos}
+            valueAnt={ant.gastosTotales}
+            valueAct={act.gastosTotales}
+            onChangeAnt={(v) => store.updateDatosAnterior('gastosTotales', v)}
+            onChangeAct={(v) => store.updateDatosActual('gastosTotales', v)}
+          />
 
-          <div className="flex items-center justify-between py-2.5 px-3">
-            <span className="text-sm text-gray-700">(-) Costos Totales</span>
-            <CampoInline
-              value={act.costosTotales}
-              onChange={(v) => store.updateDatosActual('costosTotales', v)}
-              tip={TIPS.costos}
-            />
-          </div>
+          <FilaCalcDosAnios label="= Utilidad Operativa" valorAnt={utilOpAnt} valorAct={utilOpAct} />
 
-          <div className="flex items-center justify-between py-2.5 px-3">
-            <span className="text-sm text-gray-700">(-) Gastos Totales</span>
-            <CampoInline
-              value={act.gastosTotales}
-              onChange={(v) => store.updateDatosActual('gastosTotales', v)}
-              tip={TIPS.gastos}
-            />
-          </div>
+          <FilaInputDosAnios
+            label="(+) Depreciaciones"
+            tip={TIPS.depreciaciones}
+            valueAnt={ant.depreciaciones}
+            valueAct={act.depreciaciones}
+            onChangeAnt={(v) => store.updateDatosAnterior('depreciaciones', v)}
+            onChangeAct={(v) => store.updateDatosActual('depreciaciones', v)}
+          />
+          <FilaInputDosAnios
+            label="(+) Amortizaciones"
+            tip={TIPS.amortizaciones}
+            valueAnt={ant.amortizaciones}
+            valueAct={act.amortizaciones}
+            onChangeAnt={(v) => store.updateDatosAnterior('amortizaciones', v)}
+            onChangeAct={(v) => store.updateDatosActual('amortizaciones', v)}
+          />
 
-          <FilaCalculada label="= Utilidad Operativa" valor={utilidadOperativa} />
+          <FilaCalcDosAnios label="= EBITDA" valorAnt={ebitdaAnt} valorAct={ebitdaAct} highlight />
 
-          <div className="flex items-center justify-between py-2.5 px-3">
-            <span className="text-sm text-gray-700">(+) Depreciaciones y Amort.</span>
-            <CampoInline
-              value={act.depreciacionesAmortizaciones}
-              onChange={(v) => store.updateDatosActual('depreciacionesAmortizaciones', v)}
-              tip={TIPS.depAmort}
-            />
-          </div>
-
-          <FilaCalculada label="= EBITDA" valor={ebitda} highlight />
-
-          {/* Margen EBITDA */}
+          {/* Margen EBITDA (año actual) */}
           <div className="px-3 py-2 bg-gray-50">
             <p className="text-xs text-gray-500">
-              Margen EBITDA:{' '}
+              Margen EBITDA {anioActual}:{' '}
               <motion.span
-                key={margenEbitda.toFixed(1)}
+                key={margenEbitdaAct.toFixed(1)}
                 initial={{ opacity: 0, y: -4 }}
                 animate={{ opacity: 1, y: 0 }}
                 className={`font-bold inline-block transition-colors duration-500 ${
-                  margenEbitda >= 15 ? 'text-green-600' : margenEbitda >= 5 ? 'text-yellow-600' : 'text-red-600'
+                  margenEbitdaAct >= 15 ? 'text-green-600' : margenEbitdaAct >= 5 ? 'text-yellow-600' : 'text-red-600'
                 }`}
               >
-                {margenEbitda.toFixed(1)}%
+                {margenEbitdaAct.toFixed(1)}%
               </motion.span>
-              {ingresos > 0 && (
-                <span className="text-gray-400"> — De cada $100 que vendes, ${margenEbitda.toFixed(0)} quedan como EBITDA</span>
+              {act.ingresosOperacionales > 0 && (
+                <span className="text-gray-400"> — De cada $100 que vendes, ${margenEbitdaAct.toFixed(0)} quedan como EBITDA</span>
               )}
             </p>
           </div>
         </div>
       </motion.div>
 
-      {/* ═══ SECCIÓN 2: Cambios en Capital de Trabajo ═══ */}
+      {/* ═══ SECCIÓN 2: Capital de Trabajo ═══ */}
       <motion.div
         custom={1}
         variants={sectionVariants}
@@ -448,60 +494,49 @@ export function ServilletaView({ onNext, onPrev }: Props) {
         animate="visible"
         className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm"
       >
-        <SeccionHeader titulo={`Cambios en Capital de Trabajo (${anioAnterior} → ${anioActual})`} completada={seccion2Completa} />
+        <SeccionHeader titulo="Balance — Capital de Trabajo" completada={seccion2Completa} />
 
-        {/* Header de tabla */}
-        <div className="grid grid-cols-[1fr_5rem_5rem_4rem] sm:grid-cols-[1fr_6rem_6rem_5rem] gap-2 px-3 py-1.5 bg-gray-50 border-b border-gray-200 items-center">
-          <span className="text-xs font-medium text-gray-500"></span>
-          <span className="text-xs font-medium text-gray-500 text-center">{anioAnterior}</span>
-          <span className="text-xs font-medium text-gray-500 text-center">{anioActual}</span>
-          <span className="text-xs font-medium text-gray-500 text-right">Cambio</span>
-        </div>
+        <HeaderDosAnios anioAnterior={anioAnterior} anioActual={anioActual} conCambio />
 
         <div className="divide-y divide-gray-100">
-          {/* Cartera */}
-          <div className="grid grid-cols-[1fr_5rem_5rem_4rem] sm:grid-cols-[1fr_6rem_6rem_5rem] gap-2 px-3 py-2 items-center">
-            <span className="text-sm text-gray-700 flex items-center gap-1">
-              Cartera <Tooltip text={TIPS.cartera} />
-            </span>
-            <CampoTabla value={ant.carteraNeta} onChange={(v) => store.updateDatosAnterior('carteraNeta', v)} />
-            <CampoTabla value={act.carteraNeta} onChange={(v) => store.updateDatosActual('carteraNeta', v)} />
-            <CambioAnimado valor={deltaCartera} />
-          </div>
+          <FilaCambioDosAnios
+            label="Cartera"
+            tip={TIPS.cartera}
+            valueAnt={ant.carteraNeta}
+            valueAct={act.carteraNeta}
+            onChangeAnt={(v) => store.updateDatosAnterior('carteraNeta', v)}
+            onChangeAct={(v) => store.updateDatosActual('carteraNeta', v)}
+          />
+          <FilaCambioDosAnios
+            label="Inventarios"
+            tip={TIPS.inventarios}
+            valueAnt={ant.inventarios}
+            valueAct={act.inventarios}
+            onChangeAnt={(v) => store.updateDatosAnterior('inventarios', v)}
+            onChangeAct={(v) => store.updateDatosActual('inventarios', v)}
+          />
+          <FilaCambioDosAnios
+            label="Proveedores"
+            tip={TIPS.proveedores}
+            valueAnt={ant.proveedores}
+            valueAct={act.proveedores}
+            onChangeAnt={(v) => store.updateDatosAnterior('proveedores', v)}
+            onChangeAct={(v) => store.updateDatosActual('proveedores', v)}
+            invertirCambio
+          />
 
-          {/* Inventarios */}
-          <div className="grid grid-cols-[1fr_5rem_5rem_4rem] sm:grid-cols-[1fr_6rem_6rem_5rem] gap-2 px-3 py-2 items-center">
-            <span className="text-sm text-gray-700 flex items-center gap-1">
-              Inventarios <Tooltip text={TIPS.inventarios} />
-            </span>
-            <CampoTabla value={ant.inventarios} onChange={(v) => store.updateDatosAnterior('inventarios', v)} />
-            <CampoTabla value={act.inventarios} onChange={(v) => store.updateDatosActual('inventarios', v)} />
-            <CambioAnimado valor={deltaInventarios} />
-          </div>
+          <FilaCalcConCambio label="= Cambio Capital de Trabajo" valor={cambioKTNO} />
 
-          {/* Proveedores */}
-          <div className="grid grid-cols-[1fr_5rem_5rem_4rem] sm:grid-cols-[1fr_6rem_6rem_5rem] gap-2 px-3 py-2 items-center">
-            <span className="text-sm text-gray-700 flex items-center gap-1">
-              Proveedores <Tooltip text={TIPS.proveedores} />
-            </span>
-            <CampoTabla value={ant.proveedores} onChange={(v) => store.updateDatosAnterior('proveedores', v)} />
-            <CampoTabla value={act.proveedores} onChange={(v) => store.updateDatosActual('proveedores', v)} />
-            <CambioAnimado valor={deltaProveedores} />
-          </div>
+          <FilaCambioDosAnios
+            label="Activos Fijos"
+            tip={TIPS.activosFijos}
+            valueAnt={ant.activosFijosNetos}
+            valueAct={act.activosFijosNetos}
+            onChangeAnt={(v) => store.updateDatosAnterior('activosFijosNetos', v)}
+            onChangeAct={(v) => store.updateDatosActual('activosFijosNetos', v)}
+          />
 
-          <FilaCalculada label="= Cambio Capital de Trabajo" valor={cambioKTNO} />
-
-          {/* Activos Fijos */}
-          <div className="grid grid-cols-[1fr_5rem_5rem_4rem] sm:grid-cols-[1fr_6rem_6rem_5rem] gap-2 px-3 py-2 items-center">
-            <span className="text-sm text-gray-700 flex items-center gap-1">
-              Activos Fijos <Tooltip text={TIPS.activosFijos} />
-            </span>
-            <CampoTabla value={ant.activosFijosNetos} onChange={(v) => store.updateDatosAnterior('activosFijosNetos', v)} />
-            <CampoTabla value={act.activosFijosNetos} onChange={(v) => store.updateDatosActual('activosFijosNetos', v)} />
-            <CambioAnimado valor={deltaAF} />
-          </div>
-
-          <FilaCalculada label="= Cambio CAPEX" valor={deltaAF} />
+          <FilaCalcConCambio label="= Cambio CAPEX" valor={deltaAF} />
         </div>
       </motion.div>
 
@@ -513,23 +548,36 @@ export function ServilletaView({ onNext, onPrev }: Props) {
         animate="visible"
         className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm"
       >
-        <SeccionHeader titulo="Flujo de Caja Libre" completada={seccion3Completa} />
+        <SeccionHeader titulo={`Flujo de Caja Libre (${anioActual})`} completada={seccion3Completa} />
+
+        <HeaderDosAnios anioAnterior={anioAnterior} anioActual={anioActual} />
 
         <div className="divide-y divide-gray-100">
-          <FilaReferencia label="EBITDA" valor={ebitda} />
-          <FilaReferencia label="(+/-) Cambio Capital de Trabajo" valor={cambioKTNO} />
-          <FilaReferencia label="(+/-) Cambio CAPEX" valor={deltaAF} />
+          <FilaCalcDosAnios label="EBITDA" valorAnt={ebitdaAnt} valorAct={ebitdaAct} />
 
-          <div className="flex items-center justify-between py-2.5 px-3">
-            <span className="text-sm text-gray-700">(-) Impuestos {anioActual}</span>
-            <CampoInline
-              value={act.impuestos}
-              onChange={(v) => store.updateDatosActual('impuestos', v)}
-              tip={TIPS.impuestos}
-            />
+          <div className="grid grid-cols-[1fr_5rem_5rem] sm:grid-cols-[1fr_6rem_6rem] gap-2 px-3 py-2 items-center">
+            <span className="col-span-3 text-xs text-gray-500 italic">
+              (+/-) Cambio Capital de Trabajo y CAPEX se calculan automáticamente
+            </span>
           </div>
 
-          <FilaCalculada label="= Flujo de Caja Libre" valor={fcl} highlight />
+          <FilaInputDosAnios
+            label="(-) Impuestos"
+            tip={TIPS.impuestos}
+            valueAnt={ant.impuestos}
+            valueAct={act.impuestos}
+            onChangeAnt={(v) => store.updateDatosAnterior('impuestos', v)}
+            onChangeAct={(v) => store.updateDatosActual('impuestos', v)}
+          />
+
+          {/* FCL año actual destacado */}
+          <div className="bg-prestigio-100 border-l-4 border-prestigio-600 px-3 py-3 flex items-center justify-between">
+            <span className="text-sm font-bold text-prestigio-900">= Flujo de Caja Libre {anioActual}</span>
+            <ValorAnimado
+              valor={fclAct}
+              className="text-base font-bold text-prestigio-900"
+            />
+          </div>
         </div>
       </motion.div>
 
@@ -541,63 +589,76 @@ export function ServilletaView({ onNext, onPrev }: Props) {
         animate="visible"
         className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm"
       >
-        <SeccionHeader titulo="Caja Final" completada={seccion4Completa} />
+        <SeccionHeader titulo={`Caja Final (${anioActual})`} completada={seccion4Completa} />
+
+        <HeaderDosAnios anioAnterior={anioAnterior} anioActual={anioActual} />
 
         <div className="divide-y divide-gray-100">
-          <FilaReferencia label="Flujo de Caja Libre" valor={fcl} />
-
-          <div className="flex items-center justify-between py-2.5 px-3">
-            <span className="text-sm text-gray-700">(-) Intereses Financieros</span>
-            <CampoInline
-              value={act.intereses}
-              onChange={(v) => store.updateDatosActual('intereses', v)}
-              tip={TIPS.intereses}
-            />
+          {/* FCL referencia */}
+          <div className="grid grid-cols-[1fr_5rem_5rem] sm:grid-cols-[1fr_6rem_6rem] gap-2 px-3 py-2 items-center bg-gray-50">
+            <span className="text-sm text-gray-600">Flujo de Caja Libre</span>
+            <span className="text-sm font-medium text-gray-500 text-right">—</span>
+            <span className="text-sm font-medium text-gray-700 text-right">$ {fmt(fclAct)}</span>
           </div>
 
-          <div className="flex items-center justify-between py-2.5 px-3">
-            <span className="text-sm text-gray-700">(-) Amortización a Capital</span>
-            <CampoInline
-              value={act.amortizacionDeuda}
-              onChange={(v) => store.updateDatosActual('amortizacionDeuda', v)}
-              tip={TIPS.amortizacionDeuda}
-            />
-          </div>
+          <FilaInputDosAnios
+            label="(-) Intereses Financieros"
+            tip={TIPS.intereses}
+            valueAnt={ant.intereses}
+            valueAct={act.intereses}
+            onChangeAnt={(v) => store.updateDatosAnterior('intereses', v)}
+            onChangeAct={(v) => store.updateDatosActual('intereses', v)}
+          />
+          <FilaInputDosAnios
+            label="(-) Amortización a Capital"
+            tip={TIPS.amortizacionDeuda}
+            valueAnt={ant.amortizacionDeuda}
+            valueAct={act.amortizacionDeuda}
+            onChangeAnt={(v) => store.updateDatosAnterior('amortizacionDeuda', v)}
+            onChangeAct={(v) => store.updateDatosActual('amortizacionDeuda', v)}
+          />
+          <FilaInputDosAnios
+            label="(-) Dividendos"
+            tip={TIPS.dividendos}
+            valueAnt={ant.dividendos}
+            valueAct={act.dividendos}
+            onChangeAnt={(v) => store.updateDatosAnterior('dividendos', v)}
+            onChangeAct={(v) => store.updateDatosActual('dividendos', v)}
+          />
+          <FilaInputDosAnios
+            label="(+) Capitalización"
+            tip={TIPS.capitalizacion}
+            valueAnt={ant.capitalizacion}
+            valueAct={act.capitalizacion}
+            onChangeAnt={(v) => store.updateDatosAnterior('capitalizacion', v)}
+            onChangeAct={(v) => store.updateDatosActual('capitalizacion', v)}
+          />
 
-          <div className="flex items-center justify-between py-2.5 px-3">
-            <span className="text-sm text-gray-700">(-) Dividendos</span>
-            <CampoInline
-              value={act.dividendos}
-              onChange={(v) => store.updateDatosActual('dividendos', v)}
-              tip={TIPS.dividendos}
-            />
-          </div>
-
-          {/* Caja Final */}
+          {/* Caja Final destacada (año actual) */}
           <motion.div
             animate={
-              cajaFinal >= 0
+              cajaFinalAct >= 0
                 ? { backgroundColor: 'rgba(240, 253, 244, 1)' }
                 : { backgroundColor: 'rgba(254, 242, 242, 1)' }
             }
             transition={{ duration: 0.5 }}
             className={`flex items-center justify-between py-3 px-3 border-l-4 transition-colors duration-500 ${
-              cajaFinal >= 0 ? 'border-green-500' : 'border-red-500'
+              cajaFinalAct >= 0 ? 'border-green-500' : 'border-red-500'
             }`}
           >
-            <span className="text-base font-bold text-gray-900">= CAJA FINAL</span>
+            <span className="text-base font-bold text-gray-900">= CAJA FINAL {anioActual}</span>
             <ValorAnimado
-              valor={cajaFinal}
-              className={`text-base font-bold ${cajaFinal >= 0 ? 'text-green-700' : 'text-red-700'}`}
+              valor={cajaFinalAct}
+              className={`text-base font-bold ${cajaFinalAct >= 0 ? 'text-green-700' : 'text-red-700'}`}
             />
           </motion.div>
 
           {/* Interpretación */}
           <div className="px-3 py-2 bg-gray-50">
             <p className="text-xs text-gray-500">
-              {cajaFinal >= 0
-                ? `Tu empresa genera $${fmt(cajaFinal)}M de caja después de pagar operación, deuda y dividendos.`
-                : `Tu empresa tiene un déficit de caja de $${fmt(Math.abs(cajaFinal))}M. Necesitas financiación adicional o reducir gastos.`
+              {cajaFinalAct >= 0
+                ? `Tu empresa genera $${fmt(cajaFinalAct)}M de caja después de pagar operación, deuda, dividendos y aportes de socios.`
+                : `Tu empresa tiene un déficit de caja de $${fmt(Math.abs(cajaFinalAct))}M. Necesitas financiación adicional o reducir gastos.`
               }
             </p>
           </div>
