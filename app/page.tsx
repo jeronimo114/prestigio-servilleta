@@ -14,9 +14,17 @@ export default function HomePage() {
           </svg>
         </div>
 
-        {/* Badge */}
-        <div className="inline-block bg-white/10 text-white text-sm font-medium px-5 py-1.5 rounded-full border border-white/20 tracking-wide">
-          Prestigio
+        {/* Badges */}
+        <div className="flex flex-col items-center gap-2">
+          <div className="inline-block bg-white/10 text-white text-sm font-medium px-5 py-1.5 rounded-full border border-white/20 tracking-wide">
+            Prestigio
+          </div>
+          <p className="text-white/70 text-xs tracking-wider uppercase">
+            PAE <span className="text-white/40">·</span> &ldquo;Programa de Aceleración Exponencial&rdquo;
+            <span className="block text-white/50 text-[11px] mt-0.5 normal-case tracking-wide">
+              Módulo de finanzas
+            </span>
+          </p>
         </div>
 
         {/* Hero */}
@@ -24,7 +32,10 @@ export default function HomePage() {
           <h1 className="text-4xl font-bold text-white leading-tight tracking-tight">
             Servilleta<br />Financiera
           </h1>
-          <p className="font-serif italic text-white/70 text-lg max-w-sm mx-auto leading-relaxed">
+          <p className="text-white/80 text-base max-w-md mx-auto leading-relaxed">
+            La Servilleta Financiera convierte tus números en claridad: calcula tu caja, identifica alertas y entiende los indicadores vitales de tu empresa.
+          </p>
+          <p className="font-serif italic text-white/60 text-lg max-w-sm mx-auto leading-relaxed">
             Tu cuenta de tienda, hecha servilleta
           </p>
         </div>
